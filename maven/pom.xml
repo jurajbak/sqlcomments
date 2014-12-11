@@ -1,0 +1,106 @@
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>sqlcomments</artifactId>
+		<groupId>sk.vracon.sqlcomments</groupId>
+		<version>0.0.1</version>
+	</parent>
+
+	<groupId>sk.vracon</groupId>
+	<artifactId>sqlcomments-maven-plugin</artifactId>
+	<packaging>maven-plugin</packaging>
+	<name>SQL Comments Maven Plugin</name>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-plugin-plugin</artifactId>
+				<version>3.2</version>
+				<configuration>
+					<goalPrefix>sqlcomments</goalPrefix>
+				</configuration>
+				<executions>
+					<execution>
+						<id>default-descriptor</id>
+						<goals>
+							<goal>descriptor</goal>
+						</goals>
+						<phase>process-classes</phase>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.antlr</groupId>
+				<artifactId>antlr4-maven-plugin</artifactId>
+				<version>${dependency.version.antlr}</version>
+				<executions>
+					<execution>
+						<id>antlr</id>
+						<goals>
+							<goal>antlr4</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<!-- Runtime dependencies -->
+		<dependency>
+			<groupId>sk.vracon.sqlcomments</groupId>
+			<artifactId>sqlcomments-core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-plugin-api</artifactId>
+			<version>3.2.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-project</artifactId>
+			<version>3.0-alpha-2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven.plugin-tools</groupId>
+			<artifactId>maven-plugin-annotations</artifactId>
+			<version>3.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.antlr</groupId>
+			<artifactId>antlr4</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.freemarker</groupId>
+			<artifactId>freemarker</artifactId>
+		</dependency>
+
+		<!-- Test dependencies -->
+		<dependency>
+			<groupId>sk.vracon.sqlcomments</groupId>
+			<artifactId>sqlcomments-testdb</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>

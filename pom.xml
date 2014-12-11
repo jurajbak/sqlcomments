@@ -1,0 +1,193 @@
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>sk.vracon.sqlcomments</groupId>
+	<artifactId>sqlcomments</artifactId>
+	<version>0.0.1</version>
+	<packaging>pom</packaging>
+
+	<name>SQL Comments Parent POM</name>
+	<description>SQL Comments is a Java framework to extract and run SQL statements stored in Java comments.</description>
+	<url>http://www.sqlcomments.org/</url>
+	<inceptionYear>2014</inceptionYear>
+	<organization>
+		<name>Vracon s.r.o.</name>
+		<url>http://www.vracon.sk</url>
+	</organization>
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
+		</license>
+	</licenses>
+
+	<prerequisites>
+		<maven>3.0</maven>
+	</prerequisites>
+
+	<scm>
+		<connection>scm:git:git://git.code.sf.net/p/sqlcomments/code sqlcomments-code</connection>
+		<url>http://sourceforge.net/p/sqlcomments/code/ref/master/</url>
+	</scm>
+
+	<issueManagement>
+		<system>SourceForge</system>
+		<url>http://sourceforge.net/p/sqlcomments/tickets/</url>
+	</issueManagement>
+
+	<developers>
+		<developer>
+			<name>Juraj Bak</name>
+			<email>sqlcomments@vracon.sk</email>
+			<organization>Vracon s.r.o.</organization>
+			<organizationUrl>http://www.vracon.sk</organizationUrl>
+		</developer>
+	</developers>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<dependency.version.antlr>4.3</dependency.version.antlr>
+		<dependency.version.freemarker>2.3.21</dependency.version.freemarker>
+		<dependency.version.hsqldb>2.3.2</dependency.version.hsqldb>
+		<dependency.version.junit>4.11</dependency.version.junit>
+		<dependency.version.slf4japi>1.7.7</dependency.version.slf4japi>
+		<dependency.version.spring>4.1.1.RELEASE</dependency.version.spring>
+	</properties>
+
+	<modules>
+		<module>core</module>
+		<module>maven</module>
+		<module>spring</module>
+		<module>testdb</module>
+	</modules>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.1</version>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+		<profile>
+			<id>release-artifacts</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>2.10.1</version>
+						<executions>
+							<execution>
+								<id>attach-javadoc</id>
+								<phase>package</phase>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<excludePackageNames>sk.vracon.sqlcomments.maven.ecmascript,sk.vracon.sqlcomments.maven.java,sk.vracon.sqlcomments.maven.sql,sk.vracon.sqlcomments.maven.sqlcomments</excludePackageNames>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>2.4</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<phase>package</phase>
+								<goals>
+									<goal>jar-no-fork</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.5</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.antlr</groupId>
+				<artifactId>antlr4</artifactId>
+				<version>${dependency.version.antlr}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.freemarker</groupId>
+				<artifactId>freemarker</artifactId>
+				<version>${dependency.version.freemarker}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${dependency.version.junit}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${dependency.version.slf4japi}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>jcl-over-slf4j</artifactId>
+				<version>${dependency.version.slf4japi}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-log4j12</artifactId>
+				<version>${dependency.version.slf4japi}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-jdbc</artifactId>
+				<version>${dependency.version.spring}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-test</artifactId>
+				<version>${dependency.version.spring}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context</artifactId>
+				<version>${dependency.version.spring}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.hsqldb</groupId>
+				<artifactId>hsqldb</artifactId>
+				<version>${dependency.version.hsqldb}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+</project>
