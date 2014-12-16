@@ -1,12 +1,10 @@
 <?xml version="1.0"?>
-<project
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>sqlcomments</artifactId>
 		<groupId>sk.vracon.sqlcomments</groupId>
-		<version>0.0.2-SNAPSHOT</version>
+		<version>0.0.3-SNAPSHOT</version>
 	</parent>
 
 	<groupId>sk.vracon.sqlcomments</groupId>
@@ -47,14 +45,14 @@
 						<configuration>
 							<packageName>sk.vracon.sqlcomments.spring.domain</packageName>
 							<tables>
-								<USERS/>
-								<COMPANIES/>
-								<DOCUMENTS/>
+								<USERS />
+								<COMPANIES />
+								<DOCUMENTS />
 							</tables>
 							<jdbcDriverClass>org.hsqldb.jdbcDriver</jdbcDriverClass>
 							<databaseUrl>jdbc:hsqldb:res:testdb</databaseUrl>
 							<dbUserName>sa</dbUserName>
-							<dbPassword></dbPassword>
+							<dbPassword />
 							<compileWithTestClasses>true</compileWithTestClasses>
 						</configuration>
 					</execution>
