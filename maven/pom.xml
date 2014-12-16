@@ -1,15 +1,13 @@
 <?xml version="1.0"?>
-<project
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>sqlcomments</artifactId>
 		<groupId>sk.vracon.sqlcomments</groupId>
-		<version>0.0.1</version>
+		<version>0.0.2</version>
 	</parent>
 
-	<groupId>sk.vracon</groupId>
+	<groupId>sk.vracon.sqlcomments</groupId>
 	<artifactId>sqlcomments-maven-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
 	<name>SQL Comments Maven Plugin</name>

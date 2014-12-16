@@ -1,10 +1,8 @@
-<project
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>sk.vracon.sqlcomments</groupId>
 	<artifactId>sqlcomments</artifactId>
-	<version>0.0.1</version>
+	<version>0.0.2</version>
 	<packaging>pom</packaging>
 
 	<name>SQL Comments Parent POM</name>
@@ -71,6 +69,24 @@
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>external.atlassian.jgitflow</groupId>
+				<artifactId>jgitflow-maven-plugin</artifactId>
+				<version>1.0-m3</version>
+				<configuration>
+					<autoVersionSubmodules>true</autoVersionSubmodules>
+					<enableFeatureVersions>true</enableFeatureVersions>
+					<keepBranch>false</keepBranch>
+					<pushFeatures>true</pushFeatures>
+					<pushHotfixes>true</pushHotfixes>
+					<pushReleases>true</pushReleases>
+
+					<noDeploy>true</noDeploy>
+					<noFeatureBuild>true</noFeatureBuild>
+					<pullMaster>true</pullMaster>
+					<pullDevelop>true</pullDevelop>
 				</configuration>
 			</plugin>
 		</plugins>
