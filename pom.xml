@@ -79,9 +79,9 @@
 					<autoVersionSubmodules>true</autoVersionSubmodules>
 					<enableFeatureVersions>true</enableFeatureVersions>
 					<keepBranch>false</keepBranch>
-					<pushFeatures>true</pushFeatures>
-					<pushHotfixes>true</pushHotfixes>
-					<pushReleases>true</pushReleases>
+					<pushFeatures>false</pushFeatures>
+					<pushHotfixes>false</pushHotfixes>
+					<pushReleases>false</pushReleases>
 
 					<noDeploy>true</noDeploy>
 					<noFeatureBuild>true</noFeatureBuild>
