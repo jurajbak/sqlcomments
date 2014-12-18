@@ -1,5 +1,6 @@
 package sk.vracon.sqlcomments.maven.domain;
 
+import sk.vracon.sqlcomments.maven.ExampleEnum;
 
 public class Companies {
 

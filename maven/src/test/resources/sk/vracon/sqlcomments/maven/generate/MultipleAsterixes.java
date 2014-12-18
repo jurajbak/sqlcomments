@@ -1,5 +1,6 @@
 package sk.vracon.sqlcomments.maven.generate;
 
+import sk.vracon.sqlcomments.maven.ExampleEnum;
 
 public class MultipleAsterixes {
 
