@@ -16,12 +16,12 @@ public class UsersMapper implements ResultMapper<Users> {
 	public Users transform(ResultSet resultSet) throws SQLException {
 		Users result = new Users();
 		
-		result.setCompanyid((Integer) resultSet.getObject("COMPANYID"));
-		result.setCountry((String) resultSet.getObject("COUNTRY"));
-		result.setEmail((String) resultSet.getObject("EMAIL"));
-		result.setFirstName((String) resultSet.getObject("FIRST_NAME"));
-		result.setId((Integer) resultSet.getObject("ID"));
-		result.setLastName((String) resultSet.getObject("LAST_NAME"));
+		result.setCompanyid(resultSet.getInt("COMPANYID"));
+		result.setCountry(resultSet.getString("COUNTRY"));
+		result.setEmail(resultSet.getString("EMAIL"));
+		result.setFirstName(resultSet.getString("FIRST_NAME"));
+		result.setId(resultSet.getInt("ID"));
+		result.setLastName(resultSet.getString("LAST_NAME"));
 		
 		return result;
 	}

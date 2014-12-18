@@ -16,8 +16,8 @@ public class PlaceholderInsideInClauseMapper implements ResultMapper<Placeholder
 	public PlaceholderInsideInClause transform(ResultSet resultSet) throws SQLException {
 		PlaceholderInsideInClause result = new PlaceholderInsideInClause();
 		
-		result.setId((Integer) resultSet.getObject("id"));
-		result.setName((String) resultSet.getObject("name"));
+		result.setId(resultSet.getInt("id"));
+		result.setName(resultSet.getString("name"));
 		
 		return result;
 	}

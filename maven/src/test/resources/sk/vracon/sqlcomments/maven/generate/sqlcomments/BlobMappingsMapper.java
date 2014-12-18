@@ -17,11 +17,11 @@ public class BlobMappingsMapper implements ResultMapper<BlobMappings> {
 	public BlobMappings transform(ResultSet resultSet) throws SQLException {
 		BlobMappings result = new BlobMappings();
 		
-		result.setData((Blob) resultSet.getObject("DATA"));
-		result.setDescription((String) resultSet.getObject("DESCRIPTION"));
-		result.setId((Integer) resultSet.getObject("ID"));
-		result.setName((String) resultSet.getObject("NAME"));
-		result.setUserid((Integer) resultSet.getObject("USERID"));
+		result.setData(resultSet.getBlob("DATA"));
+		result.setDescription(resultSet.getString("DESCRIPTION"));
+		result.setId(resultSet.getInt("ID"));
+		result.setName(resultSet.getString("NAME"));
+		result.setUserid(resultSet.getInt("USERID"));
 		
 		return result;
 	}
