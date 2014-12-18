@@ -9,6 +9,10 @@ import sk.vracon.sqlcomments.maven.generate.SelectWithPlaceholder;
 
 public class SelectWithPlaceholderMapper implements ResultMapper<SelectWithPlaceholder> {
 
+
+	public SelectWithPlaceholderMapper() {
+	}
+
 	public SelectWithPlaceholder transform(ResultSet resultSet) throws SQLException {
 		SelectWithPlaceholder result = new SelectWithPlaceholder();
 		

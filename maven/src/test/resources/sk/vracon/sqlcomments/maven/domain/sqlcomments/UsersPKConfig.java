@@ -16,6 +16,10 @@ public class UsersPKConfig implements StatementConfiguration {
 	
 	private Set<String> __acceptNullParameters;
 
+
+	public UsersPKConfig() {
+	}
+
 	public void setId(Integer value) {
 		if(__sqlParameters == null) {
 			__sqlParameters = new HashMap<String, Object>();

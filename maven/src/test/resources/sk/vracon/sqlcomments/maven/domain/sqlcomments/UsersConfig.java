@@ -17,9 +17,11 @@ public class UsersConfig implements StatementConfiguration {
 	private Set<String> __acceptNullParameters;
 	
 	private String statementName;
+
 	
 	public UsersConfig(String operationName) {
 		statementName = operationName;
+
 	}
 
 	public UsersConfig(String operationName, sk.vracon.sqlcomments.maven.domain.Users domain) {

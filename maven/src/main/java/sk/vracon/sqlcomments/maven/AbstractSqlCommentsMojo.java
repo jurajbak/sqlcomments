@@ -34,8 +34,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
@@ -53,6 +55,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 import sk.vracon.sqlcomments.core.Constants;
+import sk.vracon.sqlcomments.core.IColumnMapper;
 import sk.vracon.sqlcomments.core.RowInfo;
 import sk.vracon.sqlcomments.core.Statement;
 import sk.vracon.sqlcomments.core.StatementContainer;
@@ -61,9 +64,9 @@ import sk.vracon.sqlcomments.maven.ecmascript.ECMAScriptLexer;
 import sk.vracon.sqlcomments.maven.ecmascript.ECMAScriptParser;
 import sk.vracon.sqlcomments.maven.ecmascript.ECMAScriptParser.ProgramContext;
 import sk.vracon.sqlcomments.maven.generate.AbstractStatementContext;
-import sk.vracon.sqlcomments.maven.generate.ColumnIdentifier;
-import sk.vracon.sqlcomments.maven.generate.ColumnInfo;
-import sk.vracon.sqlcomments.maven.generate.DBColumnDefinition;
+import sk.vracon.sqlcomments.maven.generate.TableColumnIdentifier;
+import sk.vracon.sqlcomments.maven.generate.ResultColumnInfo;
+import sk.vracon.sqlcomments.maven.generate.DBColumnMetadata;
 import sk.vracon.sqlcomments.maven.generate.InsertContext;
 import sk.vracon.sqlcomments.maven.generate.PlaceholderInfo;
 import sk.vracon.sqlcomments.maven.generate.SelectContext;
@@ -81,6 +84,26 @@ import com.google.common.io.Files;
  * 
  */
 public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
+
+    /**
+     * Table property name - className.
+     */
+    public static final String TABLE_PROP_CLASS_NAME = "className";
+
+    /**
+     * Table property name - pkGenerator.
+     */
+    public static final String TABLE_PROP_PK_GENERATOR = "pkGenerator";
+
+    /**
+     * Column property suffix - .javaClass.
+     */
+    public static final String TABLE_PROP_COLUMN_JAVA_CLASS = ".javaClass";
+
+    /**
+     * Column property suffix - .mapper.
+     */
+    public static final String TABLE_PROP_COLUMN_MAPPER = ".mapper";
 
     /**
      * The output directory where to generate files and java classes.
@@ -133,6 +156,27 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
     protected boolean compileWithTestClasses = false;
 
     /**
+     * Table meta data and a list of tables to include.
+     * 
+     * <p>
+     * Map consists of pairs &lt;table name&gt; - &lt;table properties&gt;. Properties are in form {@link Properties}.
+     * </p>
+     * <p>
+     * Currently supported properties:
+     * <ul>
+     * <li>pkGenerator - sequence call or other statement to use in generated insert statements instead of PK column</li>
+     * <li>className - canonical domain class name used instead of generated name</li>
+     * <li>[column name].javaClass - java class of a column to which result object should be mapped</li>
+     * <li>[column name].mapper - class name of a value mapper used for DB object to java transformation. Mapper class
+     * must implement {@link IColumnMapper}.</li>
+     * </ul>
+     * <p>
+     * 
+     */
+    @Parameter(required = false)
+    protected Map<String, String> tables;
+
+    /**
      * The current Maven project.
      */
     @Parameter(property = "project", required = true, readonly = true)
@@ -148,7 +192,7 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
      * 
      * Key is a composition of <table_name>.<column.name> .
      */
-    protected Map<String, DBColumnDefinition> databaseColumns;
+    protected Map<String, DBColumnMetadata> databaseColumns;
 
     /**
      * Freemarker template processor.
@@ -159,6 +203,13 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
      * Database dialect used to map SQL data types to java classes.
      */
     protected DatabaseDialect dialect;
+
+    /**
+     * Parsed table properties.
+     * 
+     * @see #tables
+     */
+    protected Map<String, Properties> tableProperties;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -180,6 +231,27 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
 
         // Create template processor
         templateProcessor = new TemplateProcessor(getLog());
+
+        // Parse table properties
+        tableProperties = new TreeMap<String, Properties>(String.CASE_INSENSITIVE_ORDER);
+        if (tables != null) {
+            String tablePropertiesString = null;
+            for (String table : tables.keySet()) {
+                try {
+                    Properties props = new Properties();
+                    tableProperties.put(table, props);
+
+                    tablePropertiesString = tables.get(table);
+                    if (tablePropertiesString != null) {
+                        props.load(new StringReader(tablePropertiesString));
+
+                    }
+                }
+                catch (IOException e) {
+                    throw new MojoExecutionException("Configuration error for table " + table + " cause: " + e.getMessage(), e);
+                }
+            }
+        }
     }
 
     /**
@@ -280,7 +352,7 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
 
         if (getLog().isDebugEnabled()) {
             if (extractor.getPrimaryContext() instanceof SelectContext) {
-                for (ColumnInfo column : ((SelectContext) extractor.getPrimaryContext()).getColumns()) {
+                for (ResultColumnInfo column : ((SelectContext) extractor.getPrimaryContext()).getColumns()) {
                     getLog().debug(column.toString());
                 }
             }
@@ -328,15 +400,15 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
         SelectContext selectContext = (SelectContext) context;
 
         // Replace columns
-        Set<ColumnInfo> columnList = new HashSet<ColumnInfo>();
-        Iterator<ColumnInfo> iterator = selectContext.getColumns().iterator();
-        for (ColumnInfo column = null; iterator.hasNext();) {
+        Set<ResultColumnInfo> columnList = new HashSet<ResultColumnInfo>();
+        Iterator<ResultColumnInfo> iterator = selectContext.getColumns().iterator();
+        for (ResultColumnInfo column = null; iterator.hasNext();) {
             column = iterator.next();
             if (!column.isAsterix()) {
                 continue;
             }
 
-            ColumnIdentifier identifier = column.getReferences().iterator().next();
+            TableColumnIdentifier identifier = column.getReferences().iterator().next();
 
             for (TableInfo table : selectContext.getTables()) {
                 if (identifier.getTableAlias() != null && !identifier.getTableAlias().equalsIgnoreCase(table.getAlias())) {
@@ -346,12 +418,13 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
 
                 if (table.getName() != null) {
                     // Get columns from DB metadata
-                    for (DBColumnDefinition dbColumn : databaseColumns.values()) {
+                    for (DBColumnMetadata dbColumn : databaseColumns.values()) {
                         if (table.getName().equalsIgnoreCase(dbColumn.getTableName())) {
-                            ColumnInfo columnReplacement = new ColumnInfo();
+                            ResultColumnInfo columnReplacement = new ResultColumnInfo();
                             columnReplacement.setColumnName(dbColumn.getColumnName());
                             columnReplacement.setJavaIdentifier(Utils.transformToJavaIdentifier(dbColumn.getColumnName(), false));
                             columnReplacement.setJavaClass(dialect.getJavaTypeForSQL(dbColumn.getSqlType(), dbColumn.getSqlTypeName()));
+                            columnReplacement.getReferences().add(new TableColumnIdentifier(identifier.getTableAlias(), dbColumn.getColumnName()));
 
                             columnList.add(columnReplacement);
                         }
@@ -374,6 +447,7 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
             throws IOException {
 
         Map<String, Set<Class<?>>> classMapping = new HashMap<String, Set<Class<?>>>();
+        Map<String, PlaceholderInfo> placeholders = new HashMap<String, PlaceholderInfo>();
 
         // Collect all replacements
         for (RowInfo row : statement.getRows()) {
@@ -385,24 +459,28 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
                         classes.add(String.class);
 
                         classMapping.put(replacementName, classes);
+                        
+                        PlaceholderInfo finalPlaceholder = new PlaceholderInfo();
+                        finalPlaceholder.setName(replacementName);
+                        placeholders.put(replacementName, finalPlaceholder);
                     }
                 }
             }
         }
 
         // Get all possible types of placeholder value
-        Set<String> collectionPlaceholders = new HashSet<String>();
-        List<PlaceholderInfo> placeholders = extractor.getPlaceholders();
-        for (PlaceholderInfo placeholder : placeholders) {
-
-            if (placeholder.isCollection()) {
-                collectionPlaceholders.add(placeholder.getName());
-            }
+        for (PlaceholderInfo placeholder : extractor.getPlaceholders()) {
 
             Set<Class<?>> classes = classMapping.get(placeholder.getName());
             if (classes == null) {
                 classes = new HashSet<Class<?>>();
                 classMapping.put(placeholder.getName(), classes);
+                
+                placeholders.put(placeholder.getName(), placeholder);
+            }
+            
+            if (placeholder.isCollection()) {
+                placeholders.get(placeholder.getName()).setCollection(true);
             }
 
             if (placeholder.getJavaClass() != null) {
@@ -438,21 +516,24 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
                     columnIndex = (columnIndex - firstColumnIndex) / 2;
 
                     // Get column identifier by context
-                    ColumnIdentifier columnIdentifier = context.getColumnIdentifiers().get(columnIndex);
+                    TableColumnIdentifier columnIdentifier = context.getColumnIdentifiers().get(columnIndex);
 
                     // Find java class by identifier
-                    Class<?> javaClass = findJavaClassForColumnIdentifier(placeholder.getContext(), columnIdentifier);
+                    Class<?> javaClass = ColumnUtils.findJavaClassForColumnIdentifier(dialect, databaseColumns, placeholder.getContext(), columnIdentifier);
 
                     if (javaClass != null) {
                         classes.add(javaClass);
                     }
+                    
+                    // Fill mapper and mapped class
+                    ColumnUtils.fillMapperToPlaceholder(getLog(), databaseColumns, tableProperties, placeholder, Collections.singleton(columnIdentifier));
                 }
 
             } else {
                 // Placeholders in queries inside select, update and delete
 
                 // Find most close column to find out java type
-                Set<ColumnIdentifier> identifiers = null;
+                Set<TableColumnIdentifier> identifiers = null;
                 ParserRuleContext baseContext = placeholder.getSqlContext();
                 while (baseContext != null && (identifiers == null || identifiers.size() == 0)) {
 
@@ -462,14 +543,17 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
                 }
 
                 if (identifiers != null) {
-                    for (ColumnIdentifier identifier : identifiers) {
-                        Class<?> javaClass = findJavaClassForColumnIdentifier(placeholder.getContext(), identifier);
+                    for (TableColumnIdentifier identifier : identifiers) {
+                        Class<?> javaClass = ColumnUtils.findJavaClassForColumnIdentifier(dialect, databaseColumns, placeholder.getContext(), identifier);
 
                         if (javaClass != null) {
                             classes.add(javaClass);
                         }
                     }
                 }
+
+                // Fill mapper and mapped class
+                ColumnUtils.fillMapperToPlaceholder(getLog(), databaseColumns, tableProperties, placeholder, identifiers);
             }
         }
 
@@ -483,18 +567,17 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
                 classes.add(Object.class);
 
                 classMapping.put(variable, classes);
+                
+                PlaceholderInfo finalPlaceholder = new PlaceholderInfo();
+                finalPlaceholder.setName(variable);
+                placeholders.put(variable, finalPlaceholder);
             }
         }
 
         // Decide the most generic class from all possibilities
-        List<PlaceholderInfo> resultPlaceholders = new ArrayList<PlaceholderInfo>(classMapping.size());
         for (Entry<String, Set<Class<?>>> entry : classMapping.entrySet()) {
-            PlaceholderInfo placeholder = new PlaceholderInfo();
+            PlaceholderInfo placeholder = placeholders.get(entry.getKey());
             placeholder.setName(entry.getKey());
-
-            if (collectionPlaceholders.contains(entry.getKey())) {
-                placeholder.setCollection(true);
-            }
 
             Set<Class<?>> classes = entry.getValue();
             if (classes.size() == 0) {
@@ -504,11 +587,10 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
                 Class<?> type = dialect.getMostGenericClass(classes);
                 placeholder.setJavaClass(type);
             }
-
-            resultPlaceholders.add(placeholder);
         }
 
         // Sort placeholders by name to avoid unnecessary changes in generated classes
+        List<PlaceholderInfo> resultPlaceholders = new ArrayList<PlaceholderInfo>(placeholders.values());
         Collections.sort(resultPlaceholders, new Comparator<PlaceholderInfo>() {
             public int compare(PlaceholderInfo o1, PlaceholderInfo o2) {
                 return o1.getName().compareTo(o2.getName());
@@ -535,8 +617,8 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
         templateProcessor.populateGenericConfigurationTemplate(outputDirectory, configurationClassName, declaration, resultPlaceholders);
     }
 
-    private Set<ColumnIdentifier> extractColumnIdentifiers(ParserRuleContext context) {
-        Set<ColumnIdentifier> identifiers = new HashSet<ColumnIdentifier>();
+    private Set<TableColumnIdentifier> extractColumnIdentifiers(ParserRuleContext context) {
+        Set<TableColumnIdentifier> identifiers = new HashSet<TableColumnIdentifier>();
 
         for (ParseTree child : context.children) {
             if (child instanceof TerminalNode) {
@@ -546,7 +628,7 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
                 // Found reference
                 Column_referenceContext ctx = (Column_referenceContext) child;
 
-                ColumnIdentifier identifier = new ColumnIdentifier();
+                TableColumnIdentifier identifier = new TableColumnIdentifier();
                 identifier.setColumnName(ctx.name.getText());
                 if (ctx.tb_name != null) {
                     identifier.setTableAlias(ctx.tb_name.getText());
@@ -554,7 +636,7 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
 
                 identifiers.add(identifier);
             } else if (child instanceof ParserRuleContext) {
-                Set<ColumnIdentifier> childIdentifiers = extractColumnIdentifiers((ParserRuleContext) child);
+                Set<TableColumnIdentifier> childIdentifiers = extractColumnIdentifiers((ParserRuleContext) child);
 
                 identifiers.addAll(childIdentifiers);
             }
@@ -581,13 +663,13 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
 
         // Assign types to columns according to database types
         SelectContext selectContext = (SelectContext) extractor.getPrimaryContext();
-        for (ColumnInfo column : selectContext.getColumns()) {
+        for (ResultColumnInfo column : selectContext.getColumns()) {
 
             if (column.getJavaClass() != null) {
                 continue;
             }
 
-            Class<?> javaClass = findJavaClassForColumn(selectContext, column);
+            Class<?> javaClass = ColumnUtils.findJavaClassForColumn(dialect, databaseColumns, selectContext, column);
 
             if (javaClass == null) {
                 throw new SyntaxErrorException("No java type found for column " + column);
@@ -596,9 +678,14 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
             column.setJavaClass(javaClass);
         }
 
+        // Assign mapped class from metadata
+        for (ResultColumnInfo column : selectContext.getColumns()) {
+            ColumnUtils.fillMapperToColumn(getLog(), databaseColumns, tableProperties, column, selectContext);
+        }
+
         // Sort columns by name to avoid unnecessary changes in generated classes
-        Collections.sort(selectContext.getColumns(), new Comparator<ColumnInfo>() {
-            public int compare(ColumnInfo o1, ColumnInfo o2) {
+        Collections.sort(selectContext.getColumns(), new Comparator<ResultColumnInfo>() {
+            public int compare(ResultColumnInfo o1, ResultColumnInfo o2) {
                 return o1.getJavaIdentifier().compareTo(o2.getJavaIdentifier());
             }
         });
@@ -608,92 +695,6 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
 
         // Write result mapper class
         templateProcessor.populateResultMapperTemplate(outputDirectory, resultClassName, selectContext, declaration);
-    }
-
-    private Class<?> findJavaClassForColumn(AbstractStatementContext selectContext, ColumnInfo column) {
-        Set<Class<?>> classes = new HashSet<Class<?>>();
-
-        // Find classes for all references in column
-        for (ColumnIdentifier identifier : column.getReferences()) {
-            Class<?> javaClass = findJavaClassForColumnIdentifier(selectContext, identifier);
-
-            if (javaClass == null) {
-                throw new SyntaxErrorException("No java type found for column identifier" + identifier);
-            }
-
-            classes.add(javaClass);
-        }
-
-        // Get most generic class
-        return dialect.getMostGenericClass(classes);
-    }
-
-    private Class<?> findJavaClassForColumnIdentifier(AbstractStatementContext selectContext, ColumnIdentifier identifier) {
-        // Check if identifier has class set
-        if (identifier.getJavaType() != null) {
-            return identifier.getJavaType();
-        }
-
-        if (identifier.getTableAlias() == null) {
-            // There's no table alias on identifier - try to find table with such column
-
-            DBColumnDefinition dbColumn = null;
-            for (TableInfo table : selectContext.getTables()) {
-                String columnFullName = table.getName().toLowerCase() + "." + identifier.getColumnName().toLowerCase();
-                dbColumn = databaseColumns.get(columnFullName);
-                if (dbColumn != null) {
-                    // Column found
-                    break;
-                }
-            }
-
-            if (dbColumn == null) {
-                // Column was not found
-                throw new SyntaxErrorException("No table with column '" + identifier.getColumnName() + "' found in database.");
-            }
-
-            Class<?> javaType = dialect.getJavaTypeForSQL(dbColumn.getSqlType(), dbColumn.getSqlTypeName());
-            if (javaType == null) {
-                throw new SyntaxErrorException("No java type found for SQL type " + dbColumn.getSqlTypeName() + " Referenced by column "
-                        + dbColumn.getTableName() + "." + dbColumn.getColumnName());
-            }
-
-            return javaType;
-        } else {
-            // Find appropriate table and class from database metadata
-            for (TableInfo table : selectContext.getTables()) {
-                if (identifier.getTableAlias().equalsIgnoreCase(table.getAlias())) {
-                    if (table.getSubqueries().size() == 0) {
-                        // Direct table definition
-                        String columnFullName = table.getName().toLowerCase() + "." + identifier.getColumnName().toLowerCase();
-                        DBColumnDefinition dbColumn = databaseColumns.get(columnFullName);
-                        if (dbColumn == null) {
-                            throw new SyntaxErrorException("Column " + columnFullName + " not found in query.");
-                        }
-                        Class<?> javaType = dialect.getJavaTypeForSQL(dbColumn.getSqlType(), dbColumn.getSqlTypeName());
-                        if (javaType == null) {
-                            throw new SyntaxErrorException("No java type found for SQL type " + dbColumn.getSqlTypeName() + " Referenced by column "
-                                    + columnFullName);
-                        }
-                        return javaType;
-                    } else {
-                        // Table defined by inner query
-                        for (SelectContext innerQuery : table.getSubqueries()) {
-                            if (identifier.getTableAlias().equalsIgnoreCase(table.getAlias())) {
-                                // Table definition has the same alias as identifier
-                                // Find appropriate column
-                                for (ColumnInfo columnInfo : innerQuery.getColumns()) {
-                                    if (identifier.getColumnName().equalsIgnoreCase(columnInfo.getColumnName())) {
-                                        return findJavaClassForColumn(innerQuery, columnInfo);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return null;
     }
 
     /**
@@ -752,9 +753,9 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
     protected void extractDatabaseMetaData(DatabaseMetaData databaseMetaData) throws SQLException {
         ResultSet columnsRS = databaseMetaData.getColumns(null, null, null, null);
 
-        databaseColumns = new HashMap<String, DBColumnDefinition>();
+        databaseColumns = new HashMap<String, DBColumnMetadata>();
         while (columnsRS.next()) {
-            DBColumnDefinition column = mapDBColumnDefinition(columnsRS);
+            DBColumnMetadata column = mapDBColumnDefinition(columnsRS);
 
             databaseColumns.put(column.getTableName().toLowerCase() + "." + column.getColumnName().toLowerCase(), column);
         }
@@ -762,14 +763,14 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
     }
 
     /**
-     * Maps column metadata into {@link DBColumnDefinition}.
+     * Maps column metadata into {@link DBColumnMetadata}.
      * 
      * @param columnsRS
      * @return
      * @throws SQLException
      */
-    protected DBColumnDefinition mapDBColumnDefinition(ResultSet columnsRS) throws SQLException {
-        DBColumnDefinition column = new DBColumnDefinition();
+    protected DBColumnMetadata mapDBColumnDefinition(ResultSet columnsRS) throws SQLException {
+        DBColumnMetadata column = new DBColumnMetadata();
         column.setColumnName(columnsRS.getString("COLUMN_NAME"));
         column.setColumnSize(columnsRS.getInt("COLUMN_SIZE"));
         column.setDecimalDigits(columnsRS.getInt("DECIMAL_DIGITS"));

@@ -9,6 +9,10 @@ import sk.vracon.sqlcomments.maven.generate.FullFeatured1;
 
 public class FullFeatured1Mapper implements ResultMapper<FullFeatured1> {
 
+
+	public FullFeatured1Mapper() {
+	}
+
 	public FullFeatured1 transform(ResultSet resultSet) throws SQLException {
 		FullFeatured1 result = new FullFeatured1();
 		

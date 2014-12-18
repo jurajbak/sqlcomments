@@ -16,6 +16,10 @@ public class SimpleUpdateConfig implements StatementConfiguration {
 	
 	private Set<String> __acceptNullParameters;
 
+
+	public SimpleUpdateConfig() {
+	}
+
 	public void setCountry(String value) {
 		if(__sqlParameters == null) {
 			__sqlParameters = new HashMap<String, Object>();

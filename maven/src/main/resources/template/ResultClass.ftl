@@ -13,15 +13,15 @@ import ${column.javaClass.name};
 public class ${simpleClassName} {
 
 <#list selectContext.columns as column>
-	private ${column.javaClass.simpleName} ${column.javaIdentifier};
+	private ${column.mappedClass! column.javaClass.simpleName} ${column.javaIdentifier};
 </#list>
 
 <#list selectContext.columns as column>
-	public ${column.javaClass.simpleName} get${column.javaIdentifier[0]?upper_case}${column.javaIdentifier[1..]}() {
+	public ${column.mappedClass! column.javaClass.simpleName} get${column.javaIdentifier[0]?upper_case}${column.javaIdentifier[1..]}() {
 		return ${column.javaIdentifier};
 	}
 
-	public void set${column.javaIdentifier[0]?upper_case}${column.javaIdentifier[1..]}(${column.javaClass.simpleName} newValue) {
+	public void set${column.javaIdentifier[0]?upper_case}${column.javaIdentifier[1..]}(${column.mappedClass! column.javaClass.simpleName} newValue) {
 		this.${column.javaIdentifier} = newValue;
 	}
 	

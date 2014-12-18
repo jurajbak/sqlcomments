@@ -14,6 +14,10 @@ public class BlobMappingsConfig implements StatementConfiguration {
 	
 	private Set<String> __acceptNullParameters;
 
+
+	public BlobMappingsConfig() {
+	}
+
 	public String statementName() {
 		return "blobMappings";
 	}

@@ -14,6 +14,10 @@ public class SimpleAsterixConfig implements StatementConfiguration {
 	
 	private Set<String> __acceptNullParameters;
 
+
+	public SimpleAsterixConfig() {
+	}
+
 	public String statementName() {
 		return "simpleAsterix";
 	}

@@ -9,6 +9,10 @@ import sk.vracon.sqlcomments.maven.generate.SimpleSelect;
 
 public class SimpleSelectMapper implements ResultMapper<SimpleSelect> {
 
+
+	public SimpleSelectMapper() {
+	}
+
 	public SimpleSelect transform(ResultSet resultSet) throws SQLException {
 		SimpleSelect result = new SimpleSelect();
 		

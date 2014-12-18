@@ -4,9 +4,16 @@ package ${packageName};
 
 <#assign classImports = []>
 <#list placeholders as placeholder>
-<#if !placeholder.javaClass.name?starts_with("java.lang.") && !classImports?seq_contains(placeholder.javaClass.name)>
-	<#assign classImports = classImports + [placeholder.javaClass.name]>
+<#if placeholder.mappedClass?has_content>
+	<#if !placeholder.mappedClass?starts_with("java.lang.") && !classImports?seq_contains(placeholder.mappedClass)>
+		<#assign classImports = classImports + [placeholder.mappedClass]>
+import ${placeholder.mappedClass};
+	</#if>
+<#else>
+	<#if !placeholder.javaClass.name?starts_with("java.lang.") && !classImports?seq_contains(placeholder.javaClass.name)>
+		<#assign classImports = classImports + [placeholder.javaClass.name]>
 import ${placeholder.javaClass.name};
+	</#if>
 </#if>
 <#if placeholder.collection && !classImports?seq_contains('java.util.Collection')>
 	<#assign classImports = classImports + ['java.util.Collection']>
@@ -32,9 +39,21 @@ public class ${simpleClassName} implements StatementConfiguration {
 	private Set<String> __acceptNullParameters;
 	
 	private String statementName;
+
+<#list placeholders as placeholder>
+	<#if placeholder.mapperClass?has_content>
+	private ${placeholder.mapperClass} ${placeholder.name}ColumnMapper = new ${placeholder.mapperClass}(); 
+	</#if> 
+</#list>
 	
 	public ${simpleClassName}(String operationName) {
 		statementName = operationName;
+
+	<#list placeholders as placeholder>
+		<#if placeholder.mapperClass?has_content>
+		${placeholder.name}ColumnMapper.setJavaType(${templateUtils.getSimpleClassName(placeholder.mappedClass)! placeholder.javaClass.simpleName}.class); 
+		</#if> 
+	</#list>
 	}
 
 	public ${simpleClassName}(String operationName, ${statementDeclaration.baseClassName} domain) {
@@ -47,12 +66,16 @@ public class ${simpleClassName} implements StatementConfiguration {
 	}
 
 <#list placeholders as placeholder>
-	public void set${placeholder.name[0]?upper_case}${placeholder.name[1..]}(<#if placeholder.collection>Collection<${placeholder.javaClass.simpleName}><#else>${placeholder.javaClass.simpleName}</#if> value) {
+	public void set${placeholder.name[0]?upper_case}${placeholder.name[1..]}(<#if placeholder.collection>Collection<${templateUtils.getSimpleClassName(placeholder.mappedClass)! placeholder.javaClass.simpleName}><#else>${templateUtils.getSimpleClassName(placeholder.mappedClass)! placeholder.javaClass.simpleName}</#if> value) {
 		if(__sqlParameters == null) {
 			__sqlParameters = new HashMap<String, Object>();
 		}
 		
+		<#if placeholder.mapperClass?has_content>
+		__sqlParameters.put("${placeholder.name}", ${placeholder.name}ColumnMapper.convertToDatabase(value));
+		<#else> 
 		__sqlParameters.put("${placeholder.name}", value);
+		</#if> 
 	}
 	
 </#list>

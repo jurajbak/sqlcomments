@@ -14,6 +14,10 @@ public class SimpleSelectConfig implements StatementConfiguration {
 	
 	private Set<String> __acceptNullParameters;
 
+
+	public SimpleSelectConfig() {
+	}
+
 	public String statementName() {
 		return "simpleSelect";
 	}

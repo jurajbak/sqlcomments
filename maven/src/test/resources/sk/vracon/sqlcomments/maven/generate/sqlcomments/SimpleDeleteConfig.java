@@ -16,6 +16,10 @@ public class SimpleDeleteConfig implements StatementConfiguration {
 	
 	private Set<String> __acceptNullParameters;
 
+
+	public SimpleDeleteConfig() {
+	}
+
 	public void setCompanyId(Integer value) {
 		if(__sqlParameters == null) {
 			__sqlParameters = new HashMap<String, Object>();

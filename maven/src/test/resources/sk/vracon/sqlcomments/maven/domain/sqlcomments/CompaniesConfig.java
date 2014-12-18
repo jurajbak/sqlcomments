@@ -1,5 +1,6 @@
 package sk.vracon.sqlcomments.maven.domain.sqlcomments;
 
+import sk.vracon.sqlcomments.maven.ExampleEnum;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,9 +18,13 @@ public class CompaniesConfig implements StatementConfiguration {
 	private Set<String> __acceptNullParameters;
 	
 	private String statementName;
+
+	private sk.vracon.sqlcomments.core.mappers.EnumMapper countryColumnMapper = new sk.vracon.sqlcomments.core.mappers.EnumMapper(); 
 	
 	public CompaniesConfig(String operationName) {
 		statementName = operationName;
+
+		countryColumnMapper.setJavaType(ExampleEnum.class); 
 	}
 
 	public CompaniesConfig(String operationName, sk.vracon.sqlcomments.maven.domain.Companies domain) {
@@ -42,12 +47,12 @@ public class CompaniesConfig implements StatementConfiguration {
 		__sqlParameters.put("city", value);
 	}
 	
-	public void setCountry(String value) {
+	public void setCountry(ExampleEnum value) {
 		if(__sqlParameters == null) {
 			__sqlParameters = new HashMap<String, Object>();
 		}
 		
-		__sqlParameters.put("country", value);
+		__sqlParameters.put("country", countryColumnMapper.convertToDatabase(value));
 	}
 	
 	public void setEmail(String value) {

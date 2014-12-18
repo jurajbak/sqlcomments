@@ -16,6 +16,10 @@ public class ReplacementParameterConfig implements StatementConfiguration {
 	
 	private Set<String> __acceptNullParameters;
 
+
+	public ReplacementParameterConfig() {
+	}
+
 	public void setReplacementParam(String value) {
 		if(__sqlParameters == null) {
 			__sqlParameters = new HashMap<String, Object>();

@@ -45,8 +45,9 @@ public class DomainMojoTest extends AbstractMojoTest {
         mojo.tables = new HashMap<String, String>() {
             {
                 put("Users", null);
-                put("Companies", null);
-                put("Documents", null);
+                put("Companies", "country" + AbstractSqlCommentsMojo.TABLE_PROP_COLUMN_JAVA_CLASS + "=sk.vracon.sqlcomments.maven.ExampleEnum\ncountry"
+                        + AbstractSqlCommentsMojo.TABLE_PROP_COLUMN_MAPPER + "=sk.vracon.sqlcomments.core.mappers.EnumMapper");
+                put("Documents", DomainMojo.TABLE_PROP_CLASS_NAME + "=sk.vracon.sqlcomments.maven.domain.Document");
             }
         };
         mojo.jdbcDriverClass = JDBC_DRIVER;
@@ -69,7 +70,7 @@ public class DomainMojoTest extends AbstractMojoTest {
 
     @Test
     public void testDocuments() throws Exception {
-        compareAllFiles("Documents");
+        compareAllFiles("Document");
     }
 
     private void compareAllFiles(String domainName) throws Exception {

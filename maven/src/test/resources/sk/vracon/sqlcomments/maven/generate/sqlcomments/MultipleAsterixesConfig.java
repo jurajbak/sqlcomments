@@ -14,6 +14,10 @@ public class MultipleAsterixesConfig implements StatementConfiguration {
 	
 	private Set<String> __acceptNullParameters;
 
+
+	public MultipleAsterixesConfig() {
+	}
+
 	public String statementName() {
 		return "multipleAsterixes";
 	}
