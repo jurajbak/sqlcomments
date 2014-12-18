@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package sk.vracon.sqlcomments.maven;
+package sk.vracon.sqlcomments.maven.dialect;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import sk.vracon.sqlcomments.maven.DatabaseDialect;
 
 public class DefaultDatabaseDialect implements DatabaseDialect {
 

@@ -60,6 +60,7 @@ import sk.vracon.sqlcomments.core.RowInfo;
 import sk.vracon.sqlcomments.core.Statement;
 import sk.vracon.sqlcomments.core.StatementContainer;
 import sk.vracon.sqlcomments.core.Utils;
+import sk.vracon.sqlcomments.maven.dialect.DefaultDatabaseDialect;
 import sk.vracon.sqlcomments.maven.ecmascript.ECMAScriptLexer;
 import sk.vracon.sqlcomments.maven.ecmascript.ECMAScriptParser;
 import sk.vracon.sqlcomments.maven.ecmascript.ECMAScriptParser.ProgramContext;
