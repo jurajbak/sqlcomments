@@ -236,7 +236,11 @@ public class DomainMojo extends AbstractSqlCommentsMojo {
             ResultSet primaryKeysRS = databaseMetaData.getPrimaryKeys(null, null, table);
             Set<String> keys = new HashSet<String>();
             while (primaryKeysRS.next()) {
-                keys.add(primaryKeysRS.getString("COLUMN_NAME"));
+                String pkTable = primaryKeysRS.getString("TABLE_NAME");
+                // Check table name again - some JDBC drivers (pgjdbc-ng) ignore filter in method getPrimaryKeys
+                if (pkTable.equalsIgnoreCase(table)) {
+                    keys.add(primaryKeysRS.getString("COLUMN_NAME"));
+                }
             }
             primaryKeysRS.close();
             tablePrimaryKeys.put(table, keys);
