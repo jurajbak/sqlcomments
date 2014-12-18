@@ -5,12 +5,12 @@ package ${packageName};
 <#assign classImports = []>
 <#list placeholders as placeholder>
 <#if placeholder.mappedClass?has_content>
-	<#if !placeholder.mappedClass?starts_with("java.lang.") && !classImports?seq_contains(placeholder.mappedClass)>
+	<#if !placeholder.mappedClass?starts_with("java.lang.") && !placeholder.mappedClass?contains("[") && !classImports?seq_contains(placeholder.mappedClass)>
 		<#assign classImports = classImports + [placeholder.mappedClass]>
 import ${placeholder.mappedClass};
 	</#if>
 <#else>
-	<#if !placeholder.javaClass.name?starts_with("java.lang.") && !classImports?seq_contains(placeholder.javaClass.name)>
+	<#if !placeholder.javaClass.name?starts_with("java.lang.") && !placeholder.javaClass.name?contains("[") && !classImports?seq_contains(placeholder.javaClass.name)>
 		<#assign classImports = classImports + [placeholder.javaClass.name]>
 import ${placeholder.javaClass.name};
 	</#if>

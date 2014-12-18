@@ -4,9 +4,16 @@ package ${packageName};
 
 <#assign classImports = []>
 <#list selectContext.columns as column>
-<#if !column.javaClass.name?starts_with("java.lang.") && !classImports?seq_contains(column.javaClass.name)>
-	<#assign classImports = classImports + [column.javaClass.name]>
+<#if column.mappedClass?has_content>
+	<#if !column.mappedClass?starts_with("java.lang.") && !column.mappedClass?contains("[") && !classImports?seq_contains(column.mappedClass)>
+		<#assign classImports = classImports + [column.mappedClass]>
+import ${column.mappedClass};
+	</#if>
+<#else>
+	<#if !column.javaClass.name?starts_with("java.lang.") && !column.javaClass.name?contains("[") && !classImports?seq_contains(column.javaClass.name)>
+		<#assign classImports = classImports + [column.javaClass.name]>
 import ${column.javaClass.name};
+	</#if>
 </#if>
 </#list>
 
