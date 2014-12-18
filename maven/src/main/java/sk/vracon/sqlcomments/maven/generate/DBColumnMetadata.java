@@ -15,7 +15,11 @@
  */
 package sk.vracon.sqlcomments.maven.generate;
 
-public class DBColumnDefinition {
+/**
+ * Represents column metadata read from database.
+ *
+ */
+public class DBColumnMetadata {
 
     private String tableName;
     private String columnName;

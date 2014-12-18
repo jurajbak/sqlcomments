@@ -14,6 +14,10 @@ public class DefaultConfigConfig implements StatementConfiguration {
 	
 	private Set<String> __acceptNullParameters;
 
+
+	public DefaultConfigConfig() {
+	}
+
 	public String statementName() {
 		return "defaultConfig";
 	}

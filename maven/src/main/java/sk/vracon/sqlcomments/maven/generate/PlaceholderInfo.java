@@ -22,6 +22,8 @@ public class PlaceholderInfo {
     private String name;
     private Class<?> javaClass;
     private boolean collection;
+    private String mappedClass;
+    private String mapperClass;
     private Variable_placeholderContext sqlContext;
     private AbstractStatementContext context;
 
@@ -49,6 +51,34 @@ public class PlaceholderInfo {
         this.collection = collection;
     }
 
+    /**
+     * @return the mappedClass
+     */
+    public String getMappedClass() {
+        return mappedClass;
+    }
+
+    /**
+     * @param mappedClass the mappedClass to set
+     */
+    public void setMappedClass(String mappedClass) {
+        this.mappedClass = mappedClass;
+    }
+
+    /**
+     * @return the mapperClass
+     */
+    public String getMapperClass() {
+        return mapperClass;
+    }
+
+    /**
+     * @param mapperClass the mapperClass to set
+     */
+    public void setMapperClass(String mapperClass) {
+        this.mapperClass = mapperClass;
+    }
+
     public Variable_placeholderContext getSqlContext() {
         return sqlContext;
     }
@@ -74,6 +104,10 @@ public class PlaceholderInfo {
         builder.append(javaClass);
         builder.append(", collection=");
         builder.append(collection);
+        builder.append(", mappedClass=");
+        builder.append(mappedClass);
+        builder.append(", mapperClass=");
+        builder.append(mapperClass);
         builder.append(", sqlContext=");
         builder.append(sqlContext);
         builder.append("]");

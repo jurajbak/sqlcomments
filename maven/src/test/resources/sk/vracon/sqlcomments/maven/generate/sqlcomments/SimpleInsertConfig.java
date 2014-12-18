@@ -16,6 +16,10 @@ public class SimpleInsertConfig implements StatementConfiguration {
 	
 	private Set<String> __acceptNullParameters;
 
+
+	public SimpleInsertConfig() {
+	}
+
 	public void setEmail(String value) {
 		if(__sqlParameters == null) {
 			__sqlParameters = new HashMap<String, Object>();

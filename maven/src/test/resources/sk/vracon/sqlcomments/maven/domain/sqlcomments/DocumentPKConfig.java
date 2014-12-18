@@ -8,13 +8,17 @@ import java.util.Set;
 
 import sk.vracon.sqlcomments.core.StatementConfiguration;
 
-public class DocumentsPKConfig implements StatementConfiguration {
+public class DocumentPKConfig implements StatementConfiguration {
 
-	private static final Class<?> BASE_CLASS = sk.vracon.sqlcomments.maven.domain.Documents.class;
+	private static final Class<?> BASE_CLASS = sk.vracon.sqlcomments.maven.domain.Document.class;
 
 	private Map<String, Object> __sqlParameters;
 	
 	private Set<String> __acceptNullParameters;
+
+
+	public DocumentPKConfig() {
+	}
 
 	public void setId(Integer value) {
 		if(__sqlParameters == null) {

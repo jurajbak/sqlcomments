@@ -16,6 +16,10 @@ public class SelectWithPlaceholderConfig implements StatementConfiguration {
 	
 	private Set<String> __acceptNullParameters;
 
+
+	public SelectWithPlaceholderConfig() {
+	}
+
 	public void setCompanyId(Integer value) {
 		if(__sqlParameters == null) {
 			__sqlParameters = new HashMap<String, Object>();

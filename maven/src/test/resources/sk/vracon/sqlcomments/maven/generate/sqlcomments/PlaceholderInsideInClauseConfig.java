@@ -17,6 +17,10 @@ public class PlaceholderInsideInClauseConfig implements StatementConfiguration {
 	
 	private Set<String> __acceptNullParameters;
 
+
+	public PlaceholderInsideInClauseConfig() {
+	}
+
 	public void setCompanyId(Collection<Integer> value) {
 		if(__sqlParameters == null) {
 			__sqlParameters = new HashMap<String, Object>();

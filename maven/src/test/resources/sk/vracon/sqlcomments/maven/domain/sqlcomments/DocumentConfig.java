@@ -9,21 +9,23 @@ import java.util.Set;
 
 import sk.vracon.sqlcomments.core.StatementConfiguration;
 
-public class DocumentsConfig implements StatementConfiguration {
+public class DocumentConfig implements StatementConfiguration {
 
-	private static final Class<?> BASE_CLASS = sk.vracon.sqlcomments.maven.domain.Documents.class;
+	private static final Class<?> BASE_CLASS = sk.vracon.sqlcomments.maven.domain.Document.class;
 
 	private Map<String, Object> __sqlParameters;
 	
 	private Set<String> __acceptNullParameters;
 	
 	private String statementName;
+
 	
-	public DocumentsConfig(String operationName) {
+	public DocumentConfig(String operationName) {
 		statementName = operationName;
+
 	}
 
-	public DocumentsConfig(String operationName, sk.vracon.sqlcomments.maven.domain.Documents domain) {
+	public DocumentConfig(String operationName, sk.vracon.sqlcomments.maven.domain.Document domain) {
 		this(operationName);
 		
 		__sqlParameters = new HashMap<String, Object>();

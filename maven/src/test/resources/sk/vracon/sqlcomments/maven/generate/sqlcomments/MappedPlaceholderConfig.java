@@ -1,5 +1,6 @@
-package sk.vracon.sqlcomments.maven.domain.sqlcomments;
+package sk.vracon.sqlcomments.maven.generate.sqlcomments;
 
+import sk.vracon.sqlcomments.maven.ExampleEnum;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,36 +9,38 @@ import java.util.Set;
 
 import sk.vracon.sqlcomments.core.StatementConfiguration;
 
-public class UsersPKConfig implements StatementConfiguration {
+public class MappedPlaceholderConfig implements StatementConfiguration {
 
-	private static final Class<?> BASE_CLASS = sk.vracon.sqlcomments.maven.domain.Users.class;
+	private static final Class<?> BASE_CLASS = null;
 
 	private Map<String, Object> __sqlParameters;
 	
 	private Set<String> __acceptNullParameters;
 
+	private sk.vracon.sqlcomments.core.mappers.EnumMapper countryColumnMapper = new sk.vracon.sqlcomments.core.mappers.EnumMapper(); 
 
-	public UsersPKConfig() {
+	public MappedPlaceholderConfig() {
+		countryColumnMapper.setJavaType(ExampleEnum.class); 
 	}
 
-	public void setId(Integer value) {
+	public void setCountry(ExampleEnum value) {
 		if(__sqlParameters == null) {
 			__sqlParameters = new HashMap<String, Object>();
 		}
 		
-		__sqlParameters.put("id", value);
+		__sqlParameters.put("country", countryColumnMapper.convertToDatabase(value));
 	}
 	
-	public void acceptNullInId() {
+	public void acceptNullInCountry() {
 		if(__acceptNullParameters == null) {
 			__acceptNullParameters = new HashSet<String>();
 		}
 		
-		__acceptNullParameters.add("id");
+		__acceptNullParameters.add("country");
 	}
 	
 	public String statementName() {
-		return "findByPK";
+		return "mappedPlaceholder";
 	}
 	
 	public Class<?> baseClass() {

@@ -2,7 +2,7 @@ package sk.vracon.sqlcomments.maven.domain;
 
 import java.sql.Blob;
 
-public class Documents {
+public class Document {
 
 	private Blob data;
 	private String description;
@@ -53,7 +53,7 @@ public class Documents {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("Documents [data=");
+        builder.append("Document [data=");
         builder.append(data);
         builder.append(", description=");
         builder.append(description);

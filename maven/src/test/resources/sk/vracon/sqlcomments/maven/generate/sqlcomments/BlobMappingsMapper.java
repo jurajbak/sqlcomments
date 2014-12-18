@@ -10,6 +10,10 @@ import sk.vracon.sqlcomments.maven.generate.BlobMappings;
 
 public class BlobMappingsMapper implements ResultMapper<BlobMappings> {
 
+
+	public BlobMappingsMapper() {
+	}
+
 	public BlobMappings transform(ResultSet resultSet) throws SQLException {
 		BlobMappings result = new BlobMappings();
 		

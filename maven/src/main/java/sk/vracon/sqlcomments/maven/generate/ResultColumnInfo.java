@@ -18,15 +18,21 @@ package sk.vracon.sqlcomments.maven.generate;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ColumnInfo {
+public class ResultColumnInfo {
 
     private String columnName;
     private String javaIdentifier;
     private Class<?> javaClass;
+    private String mappedClass;
+    private String mapperClass;
     private boolean asterix;
-    private Set<ColumnIdentifier> references = new HashSet<ColumnIdentifier>();
+    private Set<TableColumnIdentifier> references = new HashSet<TableColumnIdentifier>();
     private Set<AbstractStatementContext> subqueries = new HashSet<AbstractStatementContext>();
 
+    public ResultColumnInfo() {
+        // TODO Auto-generated constructor stub
+    }
+    
     public String getColumnName() {
         return columnName;
     }
@@ -55,7 +61,7 @@ public class ColumnInfo {
         this.asterix = asterix;
     }
 
-    public Set<ColumnIdentifier> getReferences() {
+    public Set<TableColumnIdentifier> getReferences() {
         return references;
     }
 
@@ -67,6 +73,34 @@ public class ColumnInfo {
         this.javaClass = javaClass;
     }
 
+    /**
+     * @return the mappedClass
+     */
+    public String getMappedClass() {
+        return mappedClass;
+    }
+
+    /**
+     * @param mappedClass the mappedClass to set
+     */
+    public void setMappedClass(String mappedClass) {
+        this.mappedClass = mappedClass;
+    }
+
+    /**
+     * @return the mapperClass
+     */
+    public String getMapperClass() {
+        return mapperClass;
+    }
+
+    /**
+     * @param mapperClass the mapperClass to set
+     */
+    public void setMapperClass(String mapperClass) {
+        this.mapperClass = mapperClass;
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -76,6 +110,10 @@ public class ColumnInfo {
         builder.append(javaIdentifier);
         builder.append(", javaClass=");
         builder.append(javaClass);
+        builder.append(", mappedClass=");
+        builder.append(mappedClass);
+        builder.append(", mapperClass=");
+        builder.append(mapperClass);
         builder.append(", asterix=");
         builder.append(asterix);
         builder.append(", references=");

@@ -4,7 +4,7 @@ package sk.vracon.sqlcomments.maven.generate;
 public class MultipleAsterixes {
 
 	private String city;
-	private String country;
+	private sk.vracon.sqlcomments.maven.ExampleEnum country;
 	private String email;
 	private String firstName;
 	private Integer id;
@@ -19,11 +19,11 @@ public class MultipleAsterixes {
 		this.city = newValue;
 	}
 	
-	public String getCountry() {
+	public sk.vracon.sqlcomments.maven.ExampleEnum getCountry() {
 		return country;
 	}
 
-	public void setCountry(String newValue) {
+	public void setCountry(sk.vracon.sqlcomments.maven.ExampleEnum newValue) {
 		this.country = newValue;
 	}
 	

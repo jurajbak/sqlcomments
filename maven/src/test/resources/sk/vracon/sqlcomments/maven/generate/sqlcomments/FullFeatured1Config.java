@@ -16,6 +16,10 @@ public class FullFeatured1Config implements StatementConfiguration {
 	
 	private Set<String> __acceptNullParameters;
 
+
+	public FullFeatured1Config() {
+	}
+
 	public void setCompanyId(Integer value) {
 		if(__sqlParameters == null) {
 			__sqlParameters = new HashMap<String, Object>();

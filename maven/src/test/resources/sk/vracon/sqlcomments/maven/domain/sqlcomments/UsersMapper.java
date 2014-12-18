@@ -9,6 +9,10 @@ import sk.vracon.sqlcomments.maven.domain.Users;
 
 public class UsersMapper implements ResultMapper<Users> {
 
+
+	public UsersMapper() {
+	}
+
 	public Users transform(ResultSet resultSet) throws SQLException {
 		Users result = new Users();
 		

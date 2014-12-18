@@ -6,12 +6,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import sk.vracon.sqlcomments.core.ResultMapper;
-import sk.vracon.sqlcomments.maven.domain.Documents;
+import sk.vracon.sqlcomments.maven.domain.Document;
 
-public class DocumentsMapper implements ResultMapper<Documents> {
+public class DocumentMapper implements ResultMapper<Document> {
 
-	public Documents transform(ResultSet resultSet) throws SQLException {
-		Documents result = new Documents();
+
+	public DocumentMapper() {
+	}
+
+	public Document transform(ResultSet resultSet) throws SQLException {
+		Document result = new Document();
 		
 		result.setData((Blob) resultSet.getObject("DATA"));
 		result.setDescription((String) resultSet.getObject("DESCRIPTION"));

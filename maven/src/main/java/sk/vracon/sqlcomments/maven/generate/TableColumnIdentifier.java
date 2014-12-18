@@ -15,16 +15,19 @@
  */
 package sk.vracon.sqlcomments.maven.generate;
 
-public class ColumnIdentifier {
+/**
+ * Represents table column identifier in statement.
+ */
+public class TableColumnIdentifier {
 
     private String tableAlias;
     private String columnName;
     private Class<?> javaType;
 
-    public ColumnIdentifier() {
+    public TableColumnIdentifier() {
     }
 
-    public ColumnIdentifier(String tableAlias, String columnName) {
+    public TableColumnIdentifier(String tableAlias, String columnName) {
         super();
         this.tableAlias = tableAlias;
         this.columnName = columnName;

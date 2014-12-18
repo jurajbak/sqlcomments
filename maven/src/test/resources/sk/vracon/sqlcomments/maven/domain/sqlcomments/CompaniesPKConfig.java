@@ -16,6 +16,10 @@ public class CompaniesPKConfig implements StatementConfiguration {
 	
 	private Set<String> __acceptNullParameters;
 
+
+	public CompaniesPKConfig() {
+	}
+
 	public void setId(Integer value) {
 		if(__sqlParameters == null) {
 			__sqlParameters = new HashMap<String, Object>();

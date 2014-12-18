@@ -49,8 +49,6 @@ public class TemplateProcessor {
 
     private static final String TEMPLATE_DOMAIN_CONFIGURATION = "template/DomainConfiguration.ftl";
 
-    private static final String TEMPLATE_DOMAIN_CLASS = "template/DomainClass.ftl";
-
     private Log log;
 
     private Configuration configuration = new Configuration(Configuration.VERSION_2_3_21);
@@ -134,10 +132,6 @@ public class TemplateProcessor {
         return data;
     }
 
-    public void writeDomainClass(File outputDirectory, String fileName, Map<String, Object> data) throws IOException {
-        writeFile(outputDirectory, fileName, TEMPLATE_DOMAIN_CLASS, data);
-    }
-
     public void writeInsert(File outputDirectory, String fileName, Map<String, Object> data) throws IOException {
         writeFile(outputDirectory, fileName, TEMPLATE_INSERT, data);
     }
@@ -167,6 +161,8 @@ public class TemplateProcessor {
         // Write template
         Writer writer = null;
         try {
+            data.put("templateUtils", new TemplateUtils());
+            
             writer = new FileWriter(outputFile);
             template.process(data, writer);
             writer.flush();
