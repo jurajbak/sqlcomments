@@ -23,13 +23,11 @@ import java.util.regex.Matcher;
 
 import javax.script.Compilable;
 import javax.script.CompiledScript;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 /**
  * Statement parser.
  */
-@SuppressWarnings("restriction")
 public class StatementParser {
 
     /**
@@ -40,23 +38,17 @@ public class StatementParser {
      * 
      * @param statementText
      *            statement body
-     * @param scriptEngineName
+     * @param engine
      *            script engine used for row control scripts
      * @return parsed statement
      */
-    public Statement parseStatement(String statementText, String scriptEngineName) {
+    public Statement parseStatement(String statementText, Compilable engine) {
         // Check input
         if (statementText == null) {
             throw new IllegalArgumentException("No statement to parse defined.");
         }
-        if (scriptEngineName == null) {
-            throw new IllegalArgumentException("No script engine defined.");
-        }
-
-        // Get script engine
-        Compilable engine = (Compilable) new ScriptEngineManager().getEngineByName(scriptEngineName);
         if (engine == null) {
-            throw new IllegalStateException("No script engine '" + scriptEngineName + "' found.");
+            throw new IllegalArgumentException("No script engine defined.");
         }
 
         // Parse text

@@ -20,6 +20,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
+import javax.script.Compilable;
+import javax.script.ScriptEngineManager;
+
 /**
  * Statement container implements loading and caching of statements.
  * 
@@ -42,14 +45,19 @@ import java.util.Scanner;
  */
 public class StatementContainer {
 
+    private static final String DEFAULT_SCRIPT_ENGINE = "javascript";
+
     private boolean enableCache = true;
-    private String scriptEngineName = "javascript";
+    private Compilable scriptEngine;
     private Map<String, Statement> statements = new HashMap<String, Statement>();
 
     /**
      * Creates instance of statement container with default settings.
+     * <p>
+     * Using javascript as a default script engine.
      */
     public StatementContainer() {
+        this(DEFAULT_SCRIPT_ENGINE);
     }
 
     /**
@@ -61,7 +69,31 @@ public class StatementContainer {
      * @see ScriptEngineManager
      */
     public StatementContainer(String scriptEngineName) {
-        this.scriptEngineName = scriptEngineName;
+        // Check input
+        if (scriptEngineName == null) {
+            throw new IllegalArgumentException("No script engine defined.");
+        }
+
+        // Get script engine
+        scriptEngine = (Compilable) new ScriptEngineManager().getEngineByName(scriptEngineName);
+        if (scriptEngine == null) {
+            throw new IllegalStateException("No script engine '" + scriptEngineName + "' found.");
+        }
+    }
+
+    /**
+     * Creates instance of statement container with specified script engine.
+     * 
+     * @param scriptEngine
+     *            script engine
+     */
+    public StatementContainer(Compilable scriptEngine) {
+        // Check input
+        if (scriptEngine == null) {
+            throw new IllegalArgumentException("No script engine defined.");
+        }
+
+        this.scriptEngine = scriptEngine;
     }
 
     /**
@@ -143,7 +175,7 @@ public class StatementContainer {
      * @return parsed statement
      */
     public Statement addStatement(String statementName, String statementText) {
-        Statement statement = new StatementParser().parseStatement(statementText, scriptEngineName);
+        Statement statement = new StatementParser().parseStatement(statementText, scriptEngine);
 
         if (enableCache) {
             statements.put(statementName, statement);

@@ -16,13 +16,17 @@
 package sk.vracon.sqlcomments.core;
 
 import static org.junit.Assert.*;
+
+import javax.script.Compilable;
+import javax.script.ScriptEngineManager;
+
 import org.junit.Test;
 
 public class StatementParserTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testNullStatement() {
-        new StatementParser().parseStatement(null, "javascript");
+        new StatementParser().parseStatement(null, createScriptEngine());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -32,23 +36,18 @@ public class StatementParserTest {
 
     @Test
     public void testEmptyStatement() {
-        Statement statement = new StatementParser().parseStatement("", "javascript");
+        Statement statement = new StatementParser().parseStatement("", createScriptEngine());
 
         assertNotNull(statement);
         assertNotNull(statement.getRows());
         assertEquals(0, statement.getRows().size());
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void testNonExistingEngine() {
-        new StatementParser().parseStatement("some text", "ImaginaryEngine");
-    }
-
     @Test
     public void testSimpleSelect() {
         String query = "select * from accounts";
 
-        Statement statement = new StatementParser().parseStatement(query, "javascript");
+        Statement statement = new StatementParser().parseStatement(query, createScriptEngine());
 
         assertNotNull(statement);
         assertNotNull(statement.getRows());
@@ -64,7 +63,7 @@ public class StatementParserTest {
         query.append("select * from accounts \n");
         query.append("where id = :sqlParam");
 
-        Statement statement = new StatementParser().parseStatement(query.toString(), "javascript");
+        Statement statement = new StatementParser().parseStatement(query.toString(), createScriptEngine());
 
         assertNotNull(statement);
         assertNotNull(statement.getRows());
@@ -81,7 +80,7 @@ public class StatementParserTest {
         query.append("select * from accounts \n");
         query.append("where id = :sqlParam -- Regular comment //@ x == 1 && y == 2");
 
-        Statement statement = new StatementParser().parseStatement(query.toString(), "javascript");
+        Statement statement = new StatementParser().parseStatement(query.toString(), createScriptEngine());
 
         assertNotNull(statement);
         assertNotNull(statement.getRows());
@@ -99,6 +98,15 @@ public class StatementParserTest {
         query.append("select * from accounts \n");
         query.append("where id = :sqlParam -- Regular comment //@ x == 1 ERROR && y == 2");
 
-        new StatementParser().parseStatement(query.toString(), "javascript");
+        new StatementParser().parseStatement(query.toString(), createScriptEngine());
+    }
+
+    private Compilable createScriptEngine() {
+        Compilable scriptEngine = (Compilable) new ScriptEngineManager().getEngineByName("javascript");
+        if (scriptEngine == null) {
+            throw new IllegalStateException("No script engine 'javascript' found.");
+        }
+
+        return scriptEngine;
     }
 }
