@@ -39,7 +39,6 @@ import org.slf4j.LoggerFactory;
  * To log generated statement string, setup logging for this class to debug level.
  * </p>
  */
-@SuppressWarnings("restriction")
 public class StatementGenerator {
 
     private static Logger logger = LoggerFactory.getLogger(StatementGenerator.class);

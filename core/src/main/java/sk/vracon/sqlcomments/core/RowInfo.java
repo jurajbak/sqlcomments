@@ -22,7 +22,6 @@ import javax.script.CompiledScript;
 /**
  * POJO class containing single parsed line of a SQL statement.
  */
-@SuppressWarnings("restriction")
 public class RowInfo {
 
     private String line;
