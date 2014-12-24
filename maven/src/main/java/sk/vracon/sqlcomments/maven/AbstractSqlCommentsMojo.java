@@ -23,12 +23,14 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -460,7 +462,7 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
                         classes.add(String.class);
 
                         classMapping.put(replacementName, classes);
-                        
+
                         PlaceholderInfo finalPlaceholder = new PlaceholderInfo();
                         finalPlaceholder.setName(replacementName);
                         placeholders.put(replacementName, finalPlaceholder);
@@ -476,10 +478,10 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
             if (classes == null) {
                 classes = new HashSet<Class<?>>();
                 classMapping.put(placeholder.getName(), classes);
-                
+
                 placeholders.put(placeholder.getName(), placeholder);
             }
-            
+
             if (placeholder.isCollection()) {
                 placeholders.get(placeholder.getName()).setCollection(true);
             }
@@ -525,7 +527,7 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
                     if (javaClass != null) {
                         classes.add(javaClass);
                     }
-                    
+
                     // Fill mapper and mapped class
                     ColumnUtils.fillMapperToPlaceholder(getLog(), databaseColumns, tableProperties, placeholder, Collections.singleton(columnIdentifier));
                 }
@@ -568,7 +570,7 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
                 classes.add(Object.class);
 
                 classMapping.put(variable, classes);
-                
+
                 PlaceholderInfo finalPlaceholder = new PlaceholderInfo();
                 finalPlaceholder.setName(variable);
                 placeholders.put(variable, finalPlaceholder);
@@ -709,13 +711,41 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
      * @see {@link #extractDatabaseMetaData(DatabaseMetaData)}
      */
     protected void loadDatabaseMetadata() throws MojoExecutionException {
+
         // Register JDBC driver
         try {
-            Class.forName(jdbcDriverClass);
+            Class<?> driverClass = Class.forName(jdbcDriverClass);
+            getLog().info("Loaded driver class: " + driverClass.getName());
+
+            boolean driverIsRegistered = false;
+            Enumeration<Driver> drivers = DriverManager.getDrivers();
+            while (drivers.hasMoreElements()) {
+                if (drivers.nextElement().getClass().getName().equals(driverClass.getName())) {
+                    driverIsRegistered = true;
+                    break;
+                }
+            }
+
+            if (!driverIsRegistered) {
+                getLog().info("Registering JDBC driver.");
+
+                Driver driver = (Driver) driverClass.newInstance();
+
+                DriverManager.registerDriver(driver);
+            }
         }
         catch (ClassNotFoundException e) {
             hasErrors = true;
             throw new MojoExecutionException("Unable to load JDBC driver: " + e.getMessage(), e);
+        }
+        catch (InstantiationException e) {
+            throw new MojoExecutionException("Unable to instantiate JDBC driver: " + e.getMessage(), e);
+        }
+        catch (IllegalAccessException e) {
+            throw new MojoExecutionException("Unable to instantiate JDBC driver: " + e.getMessage(), e);
+        }
+        catch (SQLException e) {
+            throw new MojoExecutionException("Unable to instantiate JDBC driver: " + e.getMessage(), e);
         }
 
         Connection conn = null;
