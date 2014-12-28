@@ -2,7 +2,7 @@ package sk.vracon.sqlcomments.maven.domain;
 
 import java.sql.Blob;
 
-public class Document {
+public class Document implements sk.vracon.sqlcomments.maven.IDomain {
 
 	private Blob data;
 	private String description;

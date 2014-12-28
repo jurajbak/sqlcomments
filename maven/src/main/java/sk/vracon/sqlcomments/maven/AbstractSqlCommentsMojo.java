@@ -94,6 +94,11 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
     public static final String TABLE_PROP_CLASS_NAME = "className";
 
     /**
+     * Table property name - className.
+     */
+    public static final String TABLE_PROP_INTERFACES = "interfaces";
+
+    /**
      * Table property name - pkGenerator.
      */
     public static final String TABLE_PROP_PK_GENERATOR = "pkGenerator";
@@ -266,6 +271,18 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
      *            SQL file
      */
     protected void processFile(File sourceDirectory, final String resource) {
+        processFile(sourceDirectory, resource, new HashMap<String, Object>());
+    }
+
+    /**
+     * Processes SQL file and generates result class, result mapper class and statement configuration class.
+     * 
+     * @param sourceDirectory
+     *            source directory
+     * @param resource
+     *            SQL file
+     */
+    protected void processFile(File sourceDirectory, final String resource, Map<String, Object> extraTemplateModel) {
 
         File file = new File(sourceDirectory, resource);
         getLog().debug("Processing file: " + file.getAbsolutePath());
@@ -309,7 +326,7 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
             // Generate result class
             if (extractor.getPrimaryContext() instanceof SelectContext
                     && (declaration.isDefaultResultClass() || (declaration.getResultClassName() != null && declaration.getResultClassName().trim().length() > 0))) {
-                generateResultClass(extractor, declaration);
+                generateResultClass(extractor, declaration, extraTemplateModel);
             }
 
             // Generate configuration class
@@ -648,7 +665,7 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
         return identifiers;
     }
 
-    private void generateResultClass(ColumnExtractorSQLQueryListener extractor, StatementDeclaration declaration) throws IOException {
+    private void generateResultClass(ColumnExtractorSQLQueryListener extractor, StatementDeclaration declaration, Map<String, Object> extraTemplateModel) throws IOException {
 
         String resultClassName = declaration.getResultClassName();
         if (declaration.isDefaultResultClass()) {
@@ -694,10 +711,10 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
         });
 
         // Write result class
-        templateProcessor.populateResultTemplate(outputDirectory, resultClassName, selectContext, declaration);
+        templateProcessor.populateResultTemplate(outputDirectory, resultClassName, selectContext, declaration, extraTemplateModel);
 
         // Write result mapper class
-        templateProcessor.populateResultMapperTemplate(outputDirectory, resultClassName, selectContext, declaration);
+        templateProcessor.populateResultMapperTemplate(outputDirectory, resultClassName, selectContext, declaration, extraTemplateModel);
     }
 
     /**

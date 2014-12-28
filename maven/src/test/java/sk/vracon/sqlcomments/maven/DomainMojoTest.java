@@ -47,7 +47,8 @@ public class DomainMojoTest extends AbstractMojoTest {
                 put("Users", null);
                 put("Companies", "country" + AbstractSqlCommentsMojo.TABLE_PROP_COLUMN_JAVA_CLASS + "=sk.vracon.sqlcomments.maven.ExampleEnum\ncountry"
                         + AbstractSqlCommentsMojo.TABLE_PROP_COLUMN_MAPPER + "=sk.vracon.sqlcomments.core.mappers.EnumMapper");
-                put("Documents", DomainMojo.TABLE_PROP_CLASS_NAME + "=sk.vracon.sqlcomments.maven.domain.Document");
+                put("Documents", DomainMojo.TABLE_PROP_CLASS_NAME + "=sk.vracon.sqlcomments.maven.domain.Document\n" + DomainMojo.TABLE_PROP_INTERFACES
+                        + "=sk.vracon.sqlcomments.maven.IDomain");
             }
         };
         mojo.jdbcDriverClass = JDBC_DRIVER;

@@ -188,7 +188,7 @@ public class DomainMojo extends AbstractSqlCommentsMojo {
             templateProcessor.writeFindByPK(outputDirectory, findByPKFileName, templateData);
 
             // Process created SQL to generate domain class, mapper and PK configuration
-            processFile(outputDirectory, findByPKFileName);
+            processFile(outputDirectory, findByPKFileName, (Map) processedTableProperties);
 
         }
         catch (IOException e) {

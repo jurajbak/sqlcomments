@@ -17,7 +17,7 @@ import ${column.javaClass.name};
 </#if>
 </#list>
 
-public class ${simpleClassName} {
+public class ${simpleClassName} <#if interfaces?has_content>implements ${interfaces} </#if>{
 
 <#list selectContext.columns as column>
 	private ${column.mappedClass! column.javaClass.simpleName} ${column.javaIdentifier};

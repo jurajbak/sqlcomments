@@ -60,18 +60,18 @@ public class TemplateProcessor {
         configuration.setClassForTemplateLoading(TemplateProcessor.class, "/");
     }
 
-    public void populateResultTemplate(File outputDirectory, String className, AbstractStatementContext selectContext, StatementDeclaration declaration)
+    public void populateResultTemplate(File outputDirectory, String className, AbstractStatementContext selectContext, StatementDeclaration declaration, Map<String, Object> extraTemplateModel)
             throws IOException {
-        populateResultTemplate(TEMPLATE_RESULT_CLASS, outputDirectory, className, selectContext, declaration, false);
+        populateResultTemplate(TEMPLATE_RESULT_CLASS, outputDirectory, className, selectContext, declaration, false, extraTemplateModel);
     }
 
-    public void populateResultMapperTemplate(File outputDirectory, String className, AbstractStatementContext selectContext, StatementDeclaration declaration)
+    public void populateResultMapperTemplate(File outputDirectory, String className, AbstractStatementContext selectContext, StatementDeclaration declaration, Map<String, Object> extraTemplateModel)
             throws IOException {
-        populateResultTemplate(TEMPLATE_RESULT_MAPPER, outputDirectory, className, selectContext, declaration, true);
+        populateResultTemplate(TEMPLATE_RESULT_MAPPER, outputDirectory, className, selectContext, declaration, true, extraTemplateModel);
     }
 
     private void populateResultTemplate(String templateName, File outputDirectory, String className, AbstractStatementContext selectContext,
-            StatementDeclaration declaration, boolean mapper) throws IOException {
+            StatementDeclaration declaration, boolean mapper, Map<String, Object> extraTemplateModel) throws IOException {
 
         // Build the data-model
         String packageName = null;
@@ -84,6 +84,7 @@ public class TemplateProcessor {
 
         Map<String, Object> data = createGenericData(packageName, simpleClassName, declaration);
         data.put("selectContext", selectContext);
+        data.putAll(extraTemplateModel);
 
         // Create file name and write file
         String fileName = packageName == null ? "" : (packageName.replace('.', File.separatorChar) + File.separator);
