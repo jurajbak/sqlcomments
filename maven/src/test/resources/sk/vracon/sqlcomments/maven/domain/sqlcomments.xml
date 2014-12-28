@@ -1,0 +1,8 @@
+<sqlcomments>
+	<USERS />
+	<COMPANIES>
+		country.javaClass=sk.vracon.sqlcomments.maven.ExampleEnum
+		country.maper=sk.vracon.sqlcomments.core.mappers.EnumMapper
+	</COMPANIES>
+	<DOCUMENTS />
+</sqlcomments>

@@ -51,6 +51,7 @@ public class DomainMojoTest extends AbstractMojoTest {
                         + "=sk.vracon.sqlcomments.maven.IDomain");
             }
         };
+        mojo.mappingFiles = new String[] {"**/domain/sqlcomments.xml"};
         mojo.jdbcDriverClass = JDBC_DRIVER;
         mojo.databaseUrl = DB_URL;
         mojo.dbUserName = DB_USERNAME;

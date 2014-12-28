@@ -36,8 +36,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -55,6 +55,8 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import sk.vracon.sqlcomments.core.Constants;
 import sk.vracon.sqlcomments.core.IColumnMapper;
@@ -67,12 +69,12 @@ import sk.vracon.sqlcomments.maven.ecmascript.ECMAScriptLexer;
 import sk.vracon.sqlcomments.maven.ecmascript.ECMAScriptParser;
 import sk.vracon.sqlcomments.maven.ecmascript.ECMAScriptParser.ProgramContext;
 import sk.vracon.sqlcomments.maven.generate.AbstractStatementContext;
-import sk.vracon.sqlcomments.maven.generate.TableColumnIdentifier;
-import sk.vracon.sqlcomments.maven.generate.ResultColumnInfo;
 import sk.vracon.sqlcomments.maven.generate.DBColumnMetadata;
 import sk.vracon.sqlcomments.maven.generate.InsertContext;
 import sk.vracon.sqlcomments.maven.generate.PlaceholderInfo;
+import sk.vracon.sqlcomments.maven.generate.ResultColumnInfo;
 import sk.vracon.sqlcomments.maven.generate.SelectContext;
+import sk.vracon.sqlcomments.maven.generate.TableColumnIdentifier;
 import sk.vracon.sqlcomments.maven.generate.TableInfo;
 import sk.vracon.sqlcomments.maven.sql.SQLLexer;
 import sk.vracon.sqlcomments.maven.sql.SQLParser;
@@ -185,6 +187,32 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
     protected Map<String, String> tables;
 
     /**
+     * Table metadata configuration files to use.
+     * <p>
+     * Can contain ant-style wildcards and double wildcards.
+     * </p>
+     * <p>
+     * Mapping file is a simple XML with root element {code}&lt;sqlcomments&gt;{/code}. Content of root element is the
+     * same as parameter tables in pom.xml. Elements are table names and content represents table metadata in
+     * {@link Properties} format. E.g.
+     * 
+     * <pre>
+     * <sqlcomments>
+     *     <USERS />
+     *     <COMPANIES>
+     *         country.javaClass=sk.vracon.sqlcomments.maven.ExampleEnum
+     *         country.maper=sk.vracon.sqlcomments.core.mappers.EnumMapper
+     *     </COMPANIES>
+     *     <DOCUMENTS />
+     * </sqlcomments>
+     * </pre>
+     * 
+     * </p>
+     */
+    @Parameter(required = false)
+    protected String[] mappingFiles;
+
+    /**
      * The current Maven project.
      */
     @Parameter(property = "project", required = true, readonly = true)
@@ -241,13 +269,42 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
         templateProcessor = new TemplateProcessor(getLog());
 
         // Parse table properties
+        loadTableProperties();
+    }
+
+    private void loadTableProperties() throws MojoExecutionException {
         tableProperties = new TreeMap<String, Properties>(String.CASE_INSENSITIVE_ORDER);
+
+        if (mappingFiles != null) {
+            try {
+                for (int i = 0; i < mappingFiles.length; i++) {
+
+                    PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+                    Resource[] resources = resolver.getResources(mappingFiles[i]);
+
+                    for (int j = 0; j < resources.length; j++) {
+                        if (!resources[j].exists()) {
+                            continue;
+                        }
+
+                        MappingFileParser.loadMappingFile(tableProperties, resources[j].getInputStream());
+                    }
+                }
+            }
+            catch (Exception e) {
+                throw new MojoExecutionException("Unable to read mapping files: " + e.getMessage(), e);
+            }
+        }
+
         if (tables != null) {
             String tablePropertiesString = null;
             for (String table : tables.keySet()) {
                 try {
-                    Properties props = new Properties();
-                    tableProperties.put(table, props);
+                    Properties props = tableProperties.get(table);
+                    if (props == null) {
+                        props = new Properties();
+                        tableProperties.put(table, props);
+                    }
 
                     tablePropertiesString = tables.get(table);
                     if (tablePropertiesString != null) {
@@ -665,7 +722,8 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
         return identifiers;
     }
 
-    private void generateResultClass(ColumnExtractorSQLQueryListener extractor, StatementDeclaration declaration, Map<String, Object> extraTemplateModel) throws IOException {
+    private void generateResultClass(ColumnExtractorSQLQueryListener extractor, StatementDeclaration declaration, Map<String, Object> extraTemplateModel)
+            throws IOException {
 
         String resultClassName = declaration.getResultClassName();
         if (declaration.isDefaultResultClass()) {
