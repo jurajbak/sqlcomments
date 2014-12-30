@@ -34,14 +34,19 @@ public class MappingFileParser {
 
             @Override
             public void endElement(String uri, String localName, String qName) throws SAXException {
-                if ("sqlcomments".equals(localName)) {
+                String table = localName;
+                if (table == null || table.trim().length() == 0) {
+                    table = qName;
+                }
+
+                if ("sqlcomments".equals(table)) {
                     return;
                 }
 
-                Properties properties = mappings.get(localName);
+                Properties properties = mappings.get(table);
                 if (properties == null) {
                     properties = new Properties();
-                    mappings.put(localName, properties);
+                    mappings.put(table, properties);
                 }
 
                 try {
