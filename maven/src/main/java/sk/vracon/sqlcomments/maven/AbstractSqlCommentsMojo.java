@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Driver;
@@ -81,8 +82,6 @@ import sk.vracon.sqlcomments.maven.sql.SQLParser;
 import sk.vracon.sqlcomments.maven.sql.SQLParser.Column_referenceContext;
 import sk.vracon.sqlcomments.maven.sql.SQLParser.Row_value_predicandContext;
 import sk.vracon.sqlcomments.maven.sql.SQLParser.SqlContext;
-
-import com.google.common.io.Files;
 
 /**
  * Abstract MOJO implementing generating result and configuration classes.
@@ -346,7 +345,7 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
 
         try {
             // Load whole file into string
-            String fileContent = Files.toString(file, Charset.defaultCharset());
+            String fileContent = new String(Files.readAllBytes(file.toPath()), Charset.defaultCharset());
 
             // Open reader to read declaration first
             LineNumberReader reader = new LineNumberReader(new StringReader(fileContent));
