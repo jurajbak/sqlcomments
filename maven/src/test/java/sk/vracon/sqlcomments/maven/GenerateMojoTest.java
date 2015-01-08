@@ -159,7 +159,17 @@ public class GenerateMojoTest extends AbstractMojoTest {
         compareJavaFiles("DefaultResult");
         compareJavaFiles("sqlcomments/DefaultResultMapper");
     }
+    
+    @Test
+    public void testDeleteWithInnerSelect() throws Exception {
+        GenerateMojo mojo = createMojo("deleteWithInnerSelect.sql");
 
+        mojo.execute();
+
+        compareJavaFiles("sqlcomments/DeleteWithInnerSelectConfig");
+    }
+    
+    
     @SuppressWarnings("serial")
     private GenerateMojo createMojo(String sqlFile) {
         GenerateMojo mojo = new GenerateMojo();

@@ -111,10 +111,10 @@ public class ColumnExtractorSQLQueryListener extends SQLParserBaseListener {
             SelectContext finishedContext = (SelectContext) contexts.pop();
             queryPart.pop();
 
-            SelectContext context = (SelectContext) contexts.peek();
+            AbstractStatementContext context = contexts.peek();
             if (queryPart.peek() == ProcessedPart.SELECT) {
                 // Set subquery to processed column
-                ResultColumnInfo column = context.getColumns().peek();
+                ResultColumnInfo column = ((SelectContext) context).getColumns().peek();
                 column.getSubqueries().add(finishedContext);
             } else if (queryPart.peek() == ProcessedPart.FROM) {
                 // Set subquery to processed table
