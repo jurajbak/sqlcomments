@@ -19,7 +19,9 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -78,7 +80,12 @@ public class StatementGenerator {
 
             int i = 1;
             for (Object param : jdbcParams) {
-                jdbcStatement.setObject(i, param);
+                if(param instanceof Date) {
+                    // java.util.Date conversion
+                    jdbcStatement.setObject(i, new Timestamp(((Date) param).getTime()));
+                } else {
+                    jdbcStatement.setObject(i, param);
+                }
                 i++;
             }
 
@@ -123,7 +130,12 @@ public class StatementGenerator {
 
             int i = 1;
             for (Object param : jdbcParams) {
-                jdbcStatement.setObject(i, param);
+                if(param instanceof Date) {
+                    // java.util.Date conversion
+                    jdbcStatement.setObject(i, new Timestamp(((Date) param).getTime()));
+                } else {
+                    jdbcStatement.setObject(i, param);
+                }
                 i++;
             }
 
