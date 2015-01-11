@@ -10,6 +10,8 @@ import sk.vracon.sqlcomments.maven.generate.MultipleAsterixes;
 
 public class MultipleAsterixesMapper implements ResultMapper<MultipleAsterixes> {
 
+	public static final MultipleAsterixesMapper INSTANCE = new MultipleAsterixesMapper();
+
 	private sk.vracon.sqlcomments.core.mappers.EnumMapper countryColumnMapper = new sk.vracon.sqlcomments.core.mappers.EnumMapper(); 
 
 	public MultipleAsterixesMapper() {

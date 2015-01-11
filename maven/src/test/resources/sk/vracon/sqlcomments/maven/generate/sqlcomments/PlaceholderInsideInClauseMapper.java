@@ -9,6 +9,8 @@ import sk.vracon.sqlcomments.maven.generate.PlaceholderInsideInClause;
 
 public class PlaceholderInsideInClauseMapper implements ResultMapper<PlaceholderInsideInClause> {
 
+	public static final PlaceholderInsideInClauseMapper INSTANCE = new PlaceholderInsideInClauseMapper();
+
 
 	public PlaceholderInsideInClauseMapper() {
 	}

@@ -9,6 +9,8 @@ import sk.vracon.sqlcomments.maven.generate.FullFeatured1;
 
 public class FullFeatured1Mapper implements ResultMapper<FullFeatured1> {
 
+	public static final FullFeatured1Mapper INSTANCE = new FullFeatured1Mapper();
+
 
 	public FullFeatured1Mapper() {
 	}

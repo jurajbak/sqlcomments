@@ -10,6 +10,8 @@ import sk.vracon.sqlcomments.maven.domain.Document;
 
 public class DocumentMapper implements ResultMapper<Document> {
 
+	public static final DocumentMapper INSTANCE = new DocumentMapper();
+
 
 	public DocumentMapper() {
 	}

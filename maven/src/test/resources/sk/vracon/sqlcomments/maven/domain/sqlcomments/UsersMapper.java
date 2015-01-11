@@ -9,6 +9,8 @@ import sk.vracon.sqlcomments.maven.domain.Users;
 
 public class UsersMapper implements ResultMapper<Users> {
 
+	public static final UsersMapper INSTANCE = new UsersMapper();
+
 
 	public UsersMapper() {
 	}

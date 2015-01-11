@@ -9,6 +9,8 @@ import sk.vracon.sqlcomments.maven.generate.MappedPlaceholder;
 
 public class MappedPlaceholderMapper implements ResultMapper<MappedPlaceholder> {
 
+	public static final MappedPlaceholderMapper INSTANCE = new MappedPlaceholderMapper();
+
 
 	public MappedPlaceholderMapper() {
 	}

@@ -9,6 +9,8 @@ import sk.vracon.sqlcomments.maven.generate.DefaultResult;
 
 public class DefaultResultMapper implements ResultMapper<DefaultResult> {
 
+	public static final DefaultResultMapper INSTANCE = new DefaultResultMapper();
+
 
 	public DefaultResultMapper() {
 	}

@@ -33,6 +33,8 @@ import sk.vracon.sqlcomments.core.StatementConfiguration;
 public class ${simpleClassName} implements StatementConfiguration {
 
 	private static final Class<?> BASE_CLASS = <#if statementDeclaration.baseClassName?has_content>${statementDeclaration.baseClassName}.class<#else>null</#if>;
+	
+	public static final String[] PRIMARY_KEY = new String[] {<#list primaryKeys as key>"${key}"<#if key_has_next>, </#if></#list>};	
 
 	private Map<String, Object> __sqlParameters;
 	
@@ -61,7 +63,11 @@ public class ${simpleClassName} implements StatementConfiguration {
 		
 		__sqlParameters = new HashMap<String, Object>();
 		<#list placeholders as placeholder>
+		<#if placeholder.mapperClass?has_content>
+		__sqlParameters.put("${placeholder.name}", ${placeholder.name}ColumnMapper.convertToDatabase(domain.get${placeholder.name[0]?upper_case}${placeholder.name[1..]}()));
+		<#else> 
 		__sqlParameters.put("${placeholder.name}", domain.get${placeholder.name[0]?upper_case}${placeholder.name[1..]}());
+		</#if> 
 		</#list>
 	}
 

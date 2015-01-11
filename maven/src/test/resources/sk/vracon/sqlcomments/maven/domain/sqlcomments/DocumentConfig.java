@@ -12,6 +12,8 @@ import sk.vracon.sqlcomments.core.StatementConfiguration;
 public class DocumentConfig implements StatementConfiguration {
 
 	private static final Class<?> BASE_CLASS = sk.vracon.sqlcomments.maven.domain.Document.class;
+	
+	public static final String[] PRIMARY_KEY = new String[] {"ID"};	
 
 	private Map<String, Object> __sqlParameters;
 	

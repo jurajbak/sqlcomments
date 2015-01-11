@@ -149,7 +149,7 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
 
         Set<String> acceptNullParameters = configuration.generateParameterMap().keySet();
 
-        PreparedStatement stmt = createPreparedStatement(configuration.baseClass(), "delete", configuration.generateParameterMap(), acceptNullParameters, false);
+        PreparedStatement stmt = createPreparedStatement(configuration.baseClass(), "delete", configuration.generateParameterMap(), acceptNullParameters, null);
 
         try {
             stmt.executeUpdate();
@@ -168,8 +168,19 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
 
         Set<String> acceptNullParameters = configuration.generateParameterMap().keySet();
 
+        String[] keys = null;
+        if(replaceKeys) {
+            try {
+                keys = (String[]) configuration.getClass().getField("PRIMARY_KEY").get(null);
+            }
+            catch (Exception e) {
+                throw new IllegalStateException(
+                        "Unable to get value of static field " + configuration.getClass().getName() + ".PRIMARY_KEY. Cause: " + e.getMessage(), e);
+            }
+        }
+        
         PreparedStatement stmt = createPreparedStatement(configuration.baseClass(), configuration.statementName(), configuration.generateParameterMap(),
-                acceptNullParameters, replaceKeys);
+                acceptNullParameters, keys);
 
         try {
             stmt.executeUpdate();
@@ -337,7 +348,7 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
      *             thrown if statement creation failed
      */
     protected PreparedStatement createPreparedStatement(String statementName, Map<String, Object> parameters) throws StatementException {
-        return createPreparedStatement(this.getClass(), statementName, parameters, null, false);
+        return createPreparedStatement(this.getClass(), statementName, parameters, null, null);
     }
 
     /**
@@ -358,7 +369,7 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
      */
     protected PreparedStatement createPreparedStatement(String statementName, Map<String, Object> parameters, Set<String> acceptNullParameters)
             throws StatementException {
-        return createPreparedStatement(this.getClass(), statementName, parameters, acceptNullParameters, false);
+        return createPreparedStatement(this.getClass(), statementName, parameters, acceptNullParameters, null);
     }
 
     /**
@@ -379,11 +390,11 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
         }
 
         return createPreparedStatement(configuration.baseClass(), configuration.statementName(), configuration.generateParameterMap(),
-                configuration.generateParametersAcceptingNull(), false);
+                configuration.generateParametersAcceptingNull(), null);
     }
 
     private PreparedStatement createPreparedStatement(Class<?> baseClass, String statementName, Map<String, Object> parameters,
-            Set<String> acceptNullParameters, boolean withKeys) {
+            Set<String> acceptNullParameters, String[] keys) {
 
         if (statementName == null) {
             throw new IllegalArgumentException("Statement name must be set.");
@@ -391,7 +402,7 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
 
         Statement statement = statementContainer.getStatement(baseClass, statementName);
 
-        return statementGenerator.createPreparedStatement(getConnection(), statement, parameters, acceptNullParameters, withKeys);
+        return statementGenerator.createPreparedStatement(getConnection(), statement, parameters, acceptNullParameters, keys);
     }
 
     /**

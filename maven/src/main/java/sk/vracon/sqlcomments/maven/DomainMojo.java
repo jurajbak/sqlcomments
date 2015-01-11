@@ -159,20 +159,22 @@ public class DomainMojo extends AbstractSqlCommentsMojo {
                 placeholders.add(placeholder);
             }
 
-            // Create template data
+            // Generate configuration class
+            Map<String, Object> configTemplateData = new HashMap<String, Object>();
+            configTemplateData.put("primaryKeys", tablePrimaryKeys.get(table));
+            
+            templateProcessor.populateDomainConfigurationTemplate(outputDirectory, declaration.getConfigurationClassName(), declaration, placeholders, configTemplateData);
+
+            // Generate SQL files
+            String fileName = domainClass.replace('.', File.separatorChar);
+
             Map<String, Object> templateData = templateProcessor.createGenericData(domainPackageName, domainSimpleClassName, declaration);
+            templateData.put("primaryKeys", tablePrimaryKeys.get(table));
             templateData.put("table", table);
             templateData.put("columns", columns);
             templateData.put("placeholders", placeholders);
-            templateData.put("primaryKeys", tablePrimaryKeys.get(table));
             templateData.put("tableProperties", processedTableProperties);
 
-            String fileName = domainClass.replace('.', File.separatorChar);
-
-            // Generate configuration class
-            templateProcessor.populateDomainConfigurationTemplate(outputDirectory, declaration.getConfigurationClassName(), declaration, placeholders);
-
-            // Generate SQL files
             templateProcessor.writeInsert(outputDirectory, fileName + ".insert.sql", templateData);
 
             templateProcessor.writeUpdate(outputDirectory, fileName + ".update.sql", templateData);

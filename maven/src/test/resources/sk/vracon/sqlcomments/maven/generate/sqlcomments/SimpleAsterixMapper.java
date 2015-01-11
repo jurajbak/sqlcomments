@@ -10,6 +10,8 @@ import sk.vracon.sqlcomments.maven.generate.SimpleAsterix;
 
 public class SimpleAsterixMapper implements ResultMapper<SimpleAsterix> {
 
+	public static final SimpleAsterixMapper INSTANCE = new SimpleAsterixMapper();
+
 	private sk.vracon.sqlcomments.core.mappers.EnumMapper countryColumnMapper = new sk.vracon.sqlcomments.core.mappers.EnumMapper(); 
 
 	public SimpleAsterixMapper() {

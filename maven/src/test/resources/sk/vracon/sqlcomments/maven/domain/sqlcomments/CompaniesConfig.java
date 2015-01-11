@@ -12,6 +12,8 @@ import sk.vracon.sqlcomments.core.StatementConfiguration;
 public class CompaniesConfig implements StatementConfiguration {
 
 	private static final Class<?> BASE_CLASS = sk.vracon.sqlcomments.maven.domain.Companies.class;
+	
+	public static final String[] PRIMARY_KEY = new String[] {"ID"};	
 
 	private Map<String, Object> __sqlParameters;
 	
@@ -32,7 +34,7 @@ public class CompaniesConfig implements StatementConfiguration {
 		
 		__sqlParameters = new HashMap<String, Object>();
 		__sqlParameters.put("city", domain.getCity());
-		__sqlParameters.put("country", domain.getCountry());
+		__sqlParameters.put("country", countryColumnMapper.convertToDatabase(domain.getCountry()));
 		__sqlParameters.put("email", domain.getEmail());
 		__sqlParameters.put("id", domain.getId());
 		__sqlParameters.put("ipAddress", domain.getIpAddress());

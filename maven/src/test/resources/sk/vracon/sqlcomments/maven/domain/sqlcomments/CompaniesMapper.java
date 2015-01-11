@@ -10,6 +10,8 @@ import sk.vracon.sqlcomments.maven.domain.Companies;
 
 public class CompaniesMapper implements ResultMapper<Companies> {
 
+	public static final CompaniesMapper INSTANCE = new CompaniesMapper();
+
 	private sk.vracon.sqlcomments.core.mappers.EnumMapper countryColumnMapper = new sk.vracon.sqlcomments.core.mappers.EnumMapper(); 
 
 	public CompaniesMapper() {

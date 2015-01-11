@@ -60,13 +60,13 @@ public class TemplateProcessor {
         configuration.setClassForTemplateLoading(TemplateProcessor.class, "/");
     }
 
-    public void populateResultTemplate(File outputDirectory, String className, AbstractStatementContext selectContext, StatementDeclaration declaration, Map<String, Object> extraTemplateModel)
-            throws IOException {
+    public void populateResultTemplate(File outputDirectory, String className, AbstractStatementContext selectContext, StatementDeclaration declaration,
+            Map<String, Object> extraTemplateModel) throws IOException {
         populateResultTemplate(TEMPLATE_RESULT_CLASS, outputDirectory, className, selectContext, declaration, false, extraTemplateModel);
     }
 
-    public void populateResultMapperTemplate(File outputDirectory, String className, AbstractStatementContext selectContext, StatementDeclaration declaration, Map<String, Object> extraTemplateModel)
-            throws IOException {
+    public void populateResultMapperTemplate(File outputDirectory, String className, AbstractStatementContext selectContext, StatementDeclaration declaration,
+            Map<String, Object> extraTemplateModel) throws IOException {
         populateResultTemplate(TEMPLATE_RESULT_MAPPER, outputDirectory, className, selectContext, declaration, true, extraTemplateModel);
     }
 
@@ -96,16 +96,16 @@ public class TemplateProcessor {
 
     public void populateGenericConfigurationTemplate(File outputDirectory, String className, StatementDeclaration declaration,
             List<PlaceholderInfo> placeholders) throws IOException {
-        populateConfigurationTemplate(outputDirectory, className, TEMPLATE_CONFIGURATION, declaration, placeholders);
+        populateConfigurationTemplate(outputDirectory, className, TEMPLATE_CONFIGURATION, declaration, placeholders, null);
     }
 
-    public void populateDomainConfigurationTemplate(File outputDirectory, String className, StatementDeclaration declaration, List<PlaceholderInfo> placeholders)
-            throws IOException {
-        populateConfigurationTemplate(outputDirectory, className, TEMPLATE_DOMAIN_CONFIGURATION, declaration, placeholders);
+    public void populateDomainConfigurationTemplate(File outputDirectory, String className, StatementDeclaration declaration,
+            List<PlaceholderInfo> placeholders, Map<String, Object> extraTemplateModel) throws IOException {
+        populateConfigurationTemplate(outputDirectory, className, TEMPLATE_DOMAIN_CONFIGURATION, declaration, placeholders, extraTemplateModel);
     }
 
     private void populateConfigurationTemplate(File outputDirectory, String className, String templateName, StatementDeclaration declaration,
-            List<PlaceholderInfo> placeholders) throws IOException {
+            List<PlaceholderInfo> placeholders, Map<String, Object> extraTemplateModel) throws IOException {
 
         // Build the data-model
         String packageName = null;
@@ -118,7 +118,10 @@ public class TemplateProcessor {
 
         Map<String, Object> data = createGenericData(packageName, simpleClassName, declaration);
         data.put("placeholders", placeholders);
-
+        if(extraTemplateModel != null) {
+            data.putAll(extraTemplateModel);
+        }
+ 
         // Create file name and write file
         String fileName = className.replace('.', File.separatorChar) + ".java";
 
@@ -163,7 +166,7 @@ public class TemplateProcessor {
         Writer writer = null;
         try {
             data.put("templateUtils", new TemplateUtils());
-            
+
             writer = new FileWriter(outputFile);
             template.process(data, writer);
             writer.flush();
