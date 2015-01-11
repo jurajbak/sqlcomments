@@ -23,6 +23,8 @@ import <#if packageName?has_content>${packageName}.</#if>${simpleClassName};
 
 public class ${simpleClassName}Mapper implements ResultMapper<${simpleClassName}> {
 
+	public static final ${simpleClassName}Mapper INSTANCE = new ${simpleClassName}Mapper();
+
 <#list selectContext.columns as column>
 	<#if column.mapperClass?has_content>
 	private ${column.mapperClass} ${column.javaIdentifier}ColumnMapper = new ${column.mapperClass}(); 
