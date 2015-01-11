@@ -42,10 +42,14 @@ public class ${simpleClassName}Mapper implements ResultMapper<${simpleClassName}
 		
 	<#list selectContext.columns as column>
 		<#assign columnSimpleTypeName = (templateUtils.getSimpleClassName(column.mappedClass)! column.javaClass.simpleName)>
+		${column.javaClass.simpleName} ${column.javaIdentifier}Value = resultSet.${templateUtils.getResultSetValueGetterName(column.javaClass.name)}("${column.columnName}");
+		if(resultSet.wasNull()) {
+			${column.javaIdentifier}Value = null;
+		}
 		<#if column.mapperClass?has_content>
-		result.set${column.javaIdentifier[0]?upper_case}${column.javaIdentifier[1..]}((${columnSimpleTypeName}) ${column.javaIdentifier}ColumnMapper.convertToJava(resultSet.${templateUtils.getResultSetValueGetterName(column.javaClass.name)}("${column.columnName}")));
+		result.set${column.javaIdentifier[0]?upper_case}${column.javaIdentifier[1..]}((${columnSimpleTypeName}) ${column.javaIdentifier}ColumnMapper.convertToJava(${column.javaIdentifier}Value));
 		<#else>
-		result.set${column.javaIdentifier[0]?upper_case}${column.javaIdentifier[1..]}(resultSet.${templateUtils.getResultSetValueGetterName(column.javaClass.name)}("${column.columnName}"));
+		result.set${column.javaIdentifier[0]?upper_case}${column.javaIdentifier[1..]}(${column.javaIdentifier}Value);
 		</#if>
 	</#list>
 		

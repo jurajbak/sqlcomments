@@ -17,11 +17,31 @@ public class DocumentMapper implements ResultMapper<Document> {
 	public Document transform(ResultSet resultSet) throws SQLException {
 		Document result = new Document();
 		
-		result.setData(resultSet.getBlob("DATA"));
-		result.setDescription(resultSet.getString("DESCRIPTION"));
-		result.setId(resultSet.getInt("ID"));
-		result.setName(resultSet.getString("NAME"));
-		result.setUserid(resultSet.getInt("USERID"));
+		Blob dataValue = resultSet.getBlob("DATA");
+		if(resultSet.wasNull()) {
+			dataValue = null;
+		}
+		result.setData(dataValue);
+		String descriptionValue = resultSet.getString("DESCRIPTION");
+		if(resultSet.wasNull()) {
+			descriptionValue = null;
+		}
+		result.setDescription(descriptionValue);
+		Integer idValue = resultSet.getInt("ID");
+		if(resultSet.wasNull()) {
+			idValue = null;
+		}
+		result.setId(idValue);
+		String nameValue = resultSet.getString("NAME");
+		if(resultSet.wasNull()) {
+			nameValue = null;
+		}
+		result.setName(nameValue);
+		Integer useridValue = resultSet.getInt("USERID");
+		if(resultSet.wasNull()) {
+			useridValue = null;
+		}
+		result.setUserid(useridValue);
 		
 		return result;
 	}

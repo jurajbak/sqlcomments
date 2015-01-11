@@ -16,8 +16,16 @@ public class SimpleSelectMapper implements ResultMapper<SimpleSelect> {
 	public SimpleSelect transform(ResultSet resultSet) throws SQLException {
 		SimpleSelect result = new SimpleSelect();
 		
-		result.setId(resultSet.getInt("id"));
-		result.setName(resultSet.getString("name"));
+		Integer idValue = resultSet.getInt("id");
+		if(resultSet.wasNull()) {
+			idValue = null;
+		}
+		result.setId(idValue);
+		String nameValue = resultSet.getString("name");
+		if(resultSet.wasNull()) {
+			nameValue = null;
+		}
+		result.setName(nameValue);
 		
 		return result;
 	}

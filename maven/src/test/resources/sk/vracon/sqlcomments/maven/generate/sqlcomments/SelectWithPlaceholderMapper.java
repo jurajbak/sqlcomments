@@ -16,8 +16,16 @@ public class SelectWithPlaceholderMapper implements ResultMapper<SelectWithPlace
 	public SelectWithPlaceholder transform(ResultSet resultSet) throws SQLException {
 		SelectWithPlaceholder result = new SelectWithPlaceholder();
 		
-		result.setId(resultSet.getInt("id"));
-		result.setName(resultSet.getString("name"));
+		Integer idValue = resultSet.getInt("id");
+		if(resultSet.wasNull()) {
+			idValue = null;
+		}
+		result.setId(idValue);
+		String nameValue = resultSet.getString("name");
+		if(resultSet.wasNull()) {
+			nameValue = null;
+		}
+		result.setName(nameValue);
 		
 		return result;
 	}

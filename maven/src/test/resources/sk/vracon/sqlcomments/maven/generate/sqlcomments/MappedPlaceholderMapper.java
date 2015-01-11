@@ -16,8 +16,16 @@ public class MappedPlaceholderMapper implements ResultMapper<MappedPlaceholder> 
 	public MappedPlaceholder transform(ResultSet resultSet) throws SQLException {
 		MappedPlaceholder result = new MappedPlaceholder();
 		
-		result.setId(resultSet.getInt("id"));
-		result.setName(resultSet.getString("name"));
+		Integer idValue = resultSet.getInt("id");
+		if(resultSet.wasNull()) {
+			idValue = null;
+		}
+		result.setId(idValue);
+		String nameValue = resultSet.getString("name");
+		if(resultSet.wasNull()) {
+			nameValue = null;
+		}
+		result.setName(nameValue);
 		
 		return result;
 	}

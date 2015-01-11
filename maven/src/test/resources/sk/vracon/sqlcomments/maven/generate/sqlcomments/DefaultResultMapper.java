@@ -16,12 +16,36 @@ public class DefaultResultMapper implements ResultMapper<DefaultResult> {
 	public DefaultResult transform(ResultSet resultSet) throws SQLException {
 		DefaultResult result = new DefaultResult();
 		
-		result.setCompanyid(resultSet.getInt("COMPANYID"));
-		result.setCountry(resultSet.getString("COUNTRY"));
-		result.setEmail(resultSet.getString("EMAIL"));
-		result.setFirstName(resultSet.getString("FIRST_NAME"));
-		result.setId(resultSet.getInt("ID"));
-		result.setLastName(resultSet.getString("LAST_NAME"));
+		Integer companyidValue = resultSet.getInt("COMPANYID");
+		if(resultSet.wasNull()) {
+			companyidValue = null;
+		}
+		result.setCompanyid(companyidValue);
+		String countryValue = resultSet.getString("COUNTRY");
+		if(resultSet.wasNull()) {
+			countryValue = null;
+		}
+		result.setCountry(countryValue);
+		String emailValue = resultSet.getString("EMAIL");
+		if(resultSet.wasNull()) {
+			emailValue = null;
+		}
+		result.setEmail(emailValue);
+		String firstNameValue = resultSet.getString("FIRST_NAME");
+		if(resultSet.wasNull()) {
+			firstNameValue = null;
+		}
+		result.setFirstName(firstNameValue);
+		Integer idValue = resultSet.getInt("ID");
+		if(resultSet.wasNull()) {
+			idValue = null;
+		}
+		result.setId(idValue);
+		String lastNameValue = resultSet.getString("LAST_NAME");
+		if(resultSet.wasNull()) {
+			lastNameValue = null;
+		}
+		result.setLastName(lastNameValue);
 		
 		return result;
 	}
