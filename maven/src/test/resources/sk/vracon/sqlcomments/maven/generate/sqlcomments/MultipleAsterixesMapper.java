@@ -21,37 +21,37 @@ public class MultipleAsterixesMapper implements ResultMapper<MultipleAsterixes> 
 	public MultipleAsterixes transform(ResultSet resultSet) throws SQLException {
 		MultipleAsterixes result = new MultipleAsterixes();
 		
-		String cityValue = resultSet.getString("CITY");
+		String cityValue = (String) resultSet.getString("CITY");
 		if(resultSet.wasNull()) {
 			cityValue = null;
 		}
 		result.setCity(cityValue);
-		String countryValue = resultSet.getString("COUNTRY");
+		String countryValue = (String) resultSet.getString("COUNTRY");
 		if(resultSet.wasNull()) {
 			countryValue = null;
 		}
 		result.setCountry((ExampleEnum) countryColumnMapper.convertToJava(countryValue));
-		String emailValue = resultSet.getString("EMAIL");
+		String emailValue = (String) resultSet.getString("EMAIL");
 		if(resultSet.wasNull()) {
 			emailValue = null;
 		}
 		result.setEmail(emailValue);
-		String firstNameValue = resultSet.getString("first_name");
+		String firstNameValue = (String) resultSet.getString("first_name");
 		if(resultSet.wasNull()) {
 			firstNameValue = null;
 		}
 		result.setFirstName(firstNameValue);
-		Integer idValue = resultSet.getInt("ID");
+		Integer idValue = (Integer) resultSet.getInt("ID");
 		if(resultSet.wasNull()) {
 			idValue = null;
 		}
 		result.setId(idValue);
-		String ipAddressValue = resultSet.getString("IP_ADDRESS");
+		String ipAddressValue = (String) resultSet.getString("IP_ADDRESS");
 		if(resultSet.wasNull()) {
 			ipAddressValue = null;
 		}
 		result.setIpAddress(ipAddressValue);
-		String nameValue = resultSet.getString("NAME");
+		String nameValue = (String) resultSet.getString("NAME");
 		if(resultSet.wasNull()) {
 			nameValue = null;
 		}

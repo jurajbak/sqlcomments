@@ -28,7 +28,7 @@ public class TemplateUtils {
         RESULT_SET_METHODS.put(Reader.class.getCanonicalName(), "getCharacterStream");
         RESULT_SET_METHODS.put(Clob.class.getCanonicalName(), "getClob");
         RESULT_SET_METHODS.put(java.sql.Date.class.getCanonicalName(), "getDate");
-        RESULT_SET_METHODS.put(java.util.Date.class.getCanonicalName(), "getDate");
+        //RESULT_SET_METHODS.put(java.util.Date.class.getCanonicalName(), "getDate");
         RESULT_SET_METHODS.put(Double.class.getCanonicalName(), "getDouble");
         RESULT_SET_METHODS.put(Float.class.getCanonicalName(), "getFloat");
         RESULT_SET_METHODS.put(Integer.class.getCanonicalName(), "getInt");

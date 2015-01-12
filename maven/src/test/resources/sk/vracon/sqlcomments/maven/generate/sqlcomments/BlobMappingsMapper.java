@@ -19,27 +19,27 @@ public class BlobMappingsMapper implements ResultMapper<BlobMappings> {
 	public BlobMappings transform(ResultSet resultSet) throws SQLException {
 		BlobMappings result = new BlobMappings();
 		
-		Blob dataValue = resultSet.getBlob("DATA");
+		Blob dataValue = (Blob) resultSet.getBlob("DATA");
 		if(resultSet.wasNull()) {
 			dataValue = null;
 		}
 		result.setData(dataValue);
-		String descriptionValue = resultSet.getString("DESCRIPTION");
+		String descriptionValue = (String) resultSet.getString("DESCRIPTION");
 		if(resultSet.wasNull()) {
 			descriptionValue = null;
 		}
 		result.setDescription(descriptionValue);
-		Integer idValue = resultSet.getInt("ID");
+		Integer idValue = (Integer) resultSet.getInt("ID");
 		if(resultSet.wasNull()) {
 			idValue = null;
 		}
 		result.setId(idValue);
-		String nameValue = resultSet.getString("NAME");
+		String nameValue = (String) resultSet.getString("NAME");
 		if(resultSet.wasNull()) {
 			nameValue = null;
 		}
 		result.setName(nameValue);
-		Integer useridValue = resultSet.getInt("USERID");
+		Integer useridValue = (Integer) resultSet.getInt("USERID");
 		if(resultSet.wasNull()) {
 			useridValue = null;
 		}

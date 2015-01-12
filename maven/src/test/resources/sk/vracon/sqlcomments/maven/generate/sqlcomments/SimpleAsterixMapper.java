@@ -21,32 +21,32 @@ public class SimpleAsterixMapper implements ResultMapper<SimpleAsterix> {
 	public SimpleAsterix transform(ResultSet resultSet) throws SQLException {
 		SimpleAsterix result = new SimpleAsterix();
 		
-		String cityValue = resultSet.getString("CITY");
+		String cityValue = (String) resultSet.getString("CITY");
 		if(resultSet.wasNull()) {
 			cityValue = null;
 		}
 		result.setCity(cityValue);
-		String countryValue = resultSet.getString("COUNTRY");
+		String countryValue = (String) resultSet.getString("COUNTRY");
 		if(resultSet.wasNull()) {
 			countryValue = null;
 		}
 		result.setCountry((ExampleEnum) countryColumnMapper.convertToJava(countryValue));
-		String emailValue = resultSet.getString("EMAIL");
+		String emailValue = (String) resultSet.getString("EMAIL");
 		if(resultSet.wasNull()) {
 			emailValue = null;
 		}
 		result.setEmail(emailValue);
-		Integer idValue = resultSet.getInt("ID");
+		Integer idValue = (Integer) resultSet.getInt("ID");
 		if(resultSet.wasNull()) {
 			idValue = null;
 		}
 		result.setId(idValue);
-		String ipAddressValue = resultSet.getString("IP_ADDRESS");
+		String ipAddressValue = (String) resultSet.getString("IP_ADDRESS");
 		if(resultSet.wasNull()) {
 			ipAddressValue = null;
 		}
 		result.setIpAddress(ipAddressValue);
-		String nameValue = resultSet.getString("NAME");
+		String nameValue = (String) resultSet.getString("NAME");
 		if(resultSet.wasNull()) {
 			nameValue = null;
 		}

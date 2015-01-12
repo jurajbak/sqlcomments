@@ -18,12 +18,12 @@ public class FullFeatured1Mapper implements ResultMapper<FullFeatured1> {
 	public FullFeatured1 transform(ResultSet resultSet) throws SQLException {
 		FullFeatured1 result = new FullFeatured1();
 		
-		Integer idValue = resultSet.getInt("id");
+		Integer idValue = (Integer) resultSet.getInt("id");
 		if(resultSet.wasNull()) {
 			idValue = null;
 		}
 		result.setId(idValue);
-		String nameValue = resultSet.getString("name");
+		String nameValue = (String) resultSet.getString("name");
 		if(resultSet.wasNull()) {
 			nameValue = null;
 		}

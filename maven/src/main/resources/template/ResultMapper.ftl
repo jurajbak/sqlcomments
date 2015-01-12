@@ -44,7 +44,7 @@ public class ${simpleClassName}Mapper implements ResultMapper<${simpleClassName}
 		
 	<#list selectContext.columns as column>
 		<#assign columnSimpleTypeName = (templateUtils.getSimpleClassName(column.mappedClass)! column.javaClass.simpleName)>
-		${column.javaClass.simpleName} ${column.javaIdentifier}Value = resultSet.${templateUtils.getResultSetValueGetterName(column.javaClass.name)}("${column.columnName}");
+		${column.javaClass.simpleName} ${column.javaIdentifier}Value = (${column.javaClass.simpleName}) resultSet.${templateUtils.getResultSetValueGetterName(column.javaClass.name)}("${column.columnName}");
 		if(resultSet.wasNull()) {
 			${column.javaIdentifier}Value = null;
 		}
