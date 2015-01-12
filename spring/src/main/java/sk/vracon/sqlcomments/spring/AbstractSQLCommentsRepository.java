@@ -169,16 +169,16 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
         Set<String> acceptNullParameters = configuration.generateParameterMap().keySet();
 
         String[] keys = null;
-        if(replaceKeys) {
+        if (replaceKeys) {
             try {
                 keys = (String[]) configuration.getClass().getField("PRIMARY_KEY").get(null);
             }
             catch (Exception e) {
-                throw new IllegalStateException(
-                        "Unable to get value of static field " + configuration.getClass().getName() + ".PRIMARY_KEY. Cause: " + e.getMessage(), e);
+                throw new IllegalStateException("Unable to get value of static field " + configuration.getClass().getName() + ".PRIMARY_KEY. Cause: "
+                        + e.getMessage(), e);
             }
         }
-        
+
         PreparedStatement stmt = createPreparedStatement(configuration.baseClass(), configuration.statementName(), configuration.generateParameterMap(),
                 acceptNullParameters, keys);
 
@@ -456,12 +456,40 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
     }
 
     /**
+     * Executes given statement.
+     * <p>
+     * Method is intended for use with update and delete SQL statements.
+     * 
+     * @see PreparedStatement#execute()
+     * 
+     * @param config
+     *            statement configuration
+     */
+    protected void executeStatement(StatementConfiguration config) {
+        PreparedStatement statement = createPreparedStatement(config);
+
+        try {
+            statement.execute();
+        }
+        catch (SQLException e) {
+            throw new StatementException("Error while executing statement: " + e.getMessage(), e);
+        }
+        finally {
+            close(statement);
+        }
+    }
+
+    /**
      * Helper method for closing result set.
      * 
      * @param rs
      *            result set to close
      */
     protected void close(ResultSet rs) {
+        if (rs == null) {
+            return;
+        }
+
         try {
             rs.close();
         }
@@ -477,6 +505,10 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
      *            prepared statement to close
      */
     protected void close(PreparedStatement stmt) {
+        if (stmt == null) {
+            return;
+        }
+
         try {
             stmt.close();
         }
