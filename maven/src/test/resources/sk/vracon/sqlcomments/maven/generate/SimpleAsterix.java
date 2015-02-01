@@ -59,6 +59,9 @@ public class SimpleAsterix {
 		this.name = newValue;
 	}
 	
+    /**
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -77,4 +80,5 @@ public class SimpleAsterix {
         builder.append("]");
         return builder.toString();
     }
+    
 }

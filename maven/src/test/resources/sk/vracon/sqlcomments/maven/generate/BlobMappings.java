@@ -50,6 +50,9 @@ public class BlobMappings {
 		this.userid = newValue;
 	}
 	
+    /**
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -66,4 +69,5 @@ public class BlobMappings {
         builder.append("]");
         return builder.toString();
     }
+    
 }

@@ -22,6 +22,9 @@ public class SelectWithPlaceholder {
 		this.name = newValue;
 	}
 	
+    /**
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -32,4 +35,5 @@ public class SelectWithPlaceholder {
         builder.append("]");
         return builder.toString();
     }
+    
 }

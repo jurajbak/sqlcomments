@@ -58,6 +58,9 @@ public class DefaultResult {
 		this.lastName = newValue;
 	}
 	
+    /**
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -76,4 +79,5 @@ public class DefaultResult {
         builder.append("]");
         return builder.toString();
     }
+    
 }

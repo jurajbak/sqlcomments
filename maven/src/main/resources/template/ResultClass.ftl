@@ -33,6 +33,9 @@ public class ${simpleClassName} <#if interfaces?has_content>implements ${interfa
 	}
 	
 </#list>
+    /**
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -45,4 +48,40 @@ public class ${simpleClassName} <#if interfaces?has_content>implements ${interfa
         builder.append("]");
         return builder.toString();
     }
+    
+<#if primaryKeys??>
+    /**
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        ${simpleClassName} other = (${simpleClassName}) obj;
+		<#list primaryKeys as key>
+			<#list selectContext.columns as column><#if column.columnName = key>
+		if (${column.javaIdentifier} == null) {
+            if (other.${column.javaIdentifier} != null) return false;
+        } else if (!${column.javaIdentifier}.equals(other.${column.javaIdentifier})) return false;
+			</#if></#list>
+		</#list>
+        return true;
+    }    
+    
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+		<#list primaryKeys as key>
+			<#list selectContext.columns as column><#if column.columnName = key>
+        result = prime * result + ((${column.javaIdentifier} == null) ? 0 : ${column.javaIdentifier}.hashCode());
+			</#if></#list>
+		</#list>
+        return result;
+    }
+</#if>
 }
