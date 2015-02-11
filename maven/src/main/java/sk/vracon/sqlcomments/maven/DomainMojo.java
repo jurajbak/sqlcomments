@@ -37,8 +37,8 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.DefaultMavenProjectHelper;
 
+import sk.vracon.sqlcomments.core.DBColumnMetadata;
 import sk.vracon.sqlcomments.core.Utils;
-import sk.vracon.sqlcomments.maven.generate.DBColumnMetadata;
 import sk.vracon.sqlcomments.maven.generate.PlaceholderInfo;
 
 @Mojo(name = "domain", defaultPhase = LifecyclePhase.GENERATE_RESOURCES, requiresProject = true)
@@ -162,6 +162,7 @@ public class DomainMojo extends AbstractSqlCommentsMojo {
             // Generate configuration class
             Map<String, Object> configTemplateData = new HashMap<String, Object>();
             configTemplateData.put("primaryKeys", tablePrimaryKeys.get(table));
+            configTemplateData.put("tableColumns", columns);
             
             templateProcessor.populateDomainConfigurationTemplate(outputDirectory, declaration.getConfigurationClassName(), declaration, placeholders, configTemplateData);
 

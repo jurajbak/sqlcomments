@@ -21,6 +21,9 @@ import java.util.Collection;
 </#if>
 </#list>
 
+<#if tableColumns?has_content>
+import sk.vracon.sqlcomments.core.DBColumnMetadata;
+</#if>
 <#if placeholders?has_content>
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,6 +37,12 @@ public class ${simpleClassName} implements StatementConfiguration {
 
 	private static final Class<?> BASE_CLASS = <#if statementDeclaration.baseClassName?has_content>${statementDeclaration.baseClassName}.class<#else>null</#if>;
 	
+<#if tableColumns?has_content>
+	<#list tableColumns as column>
+	public static final DBColumnMetadata COLUMN_${utils.transformToJavaIdentifier(column.columnName, false)?upper_case} = new DBColumnMetadata("${column.tableName}", "${column.columnName}", ${column.sqlType?string["#"]}, "${column.sqlTypeName}", ${column.columnSize?string["#"]}, ${column.decimalDigits?string["#"]}, ${column.nullable?string});
+	
+	</#list>
+</#if>
 	public static final String[] PRIMARY_KEY = new String[] {<#list primaryKeys as key>"${key}"<#if key_has_next>, </#if></#list>};	
 
 	private Map<String, Object> __sqlParameters;

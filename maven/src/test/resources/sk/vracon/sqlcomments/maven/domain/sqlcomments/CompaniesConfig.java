@@ -2,6 +2,7 @@ package sk.vracon.sqlcomments.maven.domain.sqlcomments;
 
 import sk.vracon.sqlcomments.maven.ExampleEnum;
 
+import sk.vracon.sqlcomments.core.DBColumnMetadata;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -12,6 +13,18 @@ import sk.vracon.sqlcomments.core.StatementConfiguration;
 public class CompaniesConfig implements StatementConfiguration {
 
 	private static final Class<?> BASE_CLASS = sk.vracon.sqlcomments.maven.domain.Companies.class;
+	
+	public static final DBColumnMetadata COLUMN_CITY = new DBColumnMetadata("COMPANIES", "CITY", 12, "VARCHAR", 50, 0, true);
+	
+	public static final DBColumnMetadata COLUMN_COUNTRY = new DBColumnMetadata("COMPANIES", "COUNTRY", 12, "VARCHAR", 50, 0, true);
+	
+	public static final DBColumnMetadata COLUMN_EMAIL = new DBColumnMetadata("COMPANIES", "EMAIL", 12, "VARCHAR", 50, 0, true);
+	
+	public static final DBColumnMetadata COLUMN_ID = new DBColumnMetadata("COMPANIES", "ID", 4, "INTEGER", 32, 0, false);
+	
+	public static final DBColumnMetadata COLUMN_IPADDRESS = new DBColumnMetadata("COMPANIES", "IP_ADDRESS", 12, "VARCHAR", 20, 0, true);
+	
+	public static final DBColumnMetadata COLUMN_NAME = new DBColumnMetadata("COMPANIES", "NAME", 12, "VARCHAR", 50, 0, true);
 	
 	public static final String[] PRIMARY_KEY = new String[] {"ID"};	
 

@@ -59,7 +59,10 @@ import org.apache.maven.project.MavenProject;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
+import freemarker.template.TemplateModelException;
+
 import sk.vracon.sqlcomments.core.Constants;
+import sk.vracon.sqlcomments.core.DBColumnMetadata;
 import sk.vracon.sqlcomments.core.IColumnMapper;
 import sk.vracon.sqlcomments.core.RowInfo;
 import sk.vracon.sqlcomments.core.Statement;
@@ -70,7 +73,6 @@ import sk.vracon.sqlcomments.maven.ecmascript.ECMAScriptLexer;
 import sk.vracon.sqlcomments.maven.ecmascript.ECMAScriptParser;
 import sk.vracon.sqlcomments.maven.ecmascript.ECMAScriptParser.ProgramContext;
 import sk.vracon.sqlcomments.maven.generate.AbstractStatementContext;
-import sk.vracon.sqlcomments.maven.generate.DBColumnMetadata;
 import sk.vracon.sqlcomments.maven.generate.InsertContext;
 import sk.vracon.sqlcomments.maven.generate.PlaceholderInfo;
 import sk.vracon.sqlcomments.maven.generate.ResultColumnInfo;
@@ -265,7 +267,12 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
         loadDatabaseMetadata();
 
         // Create template processor
-        templateProcessor = new TemplateProcessor(getLog());
+        try {
+            templateProcessor = new TemplateProcessor(getLog());
+        }
+        catch (TemplateModelException e) {
+            throw new MojoExecutionException("Failed creating FreeMarker configuration: "+e.getMessage(), e);
+        }
 
         // Parse table properties
         loadTableProperties();

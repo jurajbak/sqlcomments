@@ -1,6 +1,7 @@
 package sk.vracon.sqlcomments.maven.domain.sqlcomments;
 
 
+import sk.vracon.sqlcomments.core.DBColumnMetadata;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -11,6 +12,18 @@ import sk.vracon.sqlcomments.core.StatementConfiguration;
 public class UsersConfig implements StatementConfiguration {
 
 	private static final Class<?> BASE_CLASS = sk.vracon.sqlcomments.maven.domain.Users.class;
+	
+	public static final DBColumnMetadata COLUMN_COMPANYID = new DBColumnMetadata("USERS", "COMPANYID", 4, "INTEGER", 32, 0, true);
+	
+	public static final DBColumnMetadata COLUMN_COUNTRY = new DBColumnMetadata("USERS", "COUNTRY", 12, "VARCHAR", 50, 0, true);
+	
+	public static final DBColumnMetadata COLUMN_EMAIL = new DBColumnMetadata("USERS", "EMAIL", 12, "VARCHAR", 50, 0, true);
+	
+	public static final DBColumnMetadata COLUMN_FIRSTNAME = new DBColumnMetadata("USERS", "FIRST_NAME", 12, "VARCHAR", 50, 0, true);
+	
+	public static final DBColumnMetadata COLUMN_ID = new DBColumnMetadata("USERS", "ID", 4, "INTEGER", 32, 0, false);
+	
+	public static final DBColumnMetadata COLUMN_LASTNAME = new DBColumnMetadata("USERS", "LAST_NAME", 12, "VARCHAR", 50, 0, true);
 	
 	public static final String[] PRIMARY_KEY = new String[] {"ID"};	
 

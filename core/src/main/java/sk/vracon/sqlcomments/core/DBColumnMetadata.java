@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package sk.vracon.sqlcomments.maven.generate;
+package sk.vracon.sqlcomments.core;
 
 /**
  * Represents column metadata read from database.
- *
+ * 
  */
 public class DBColumnMetadata {
 
@@ -28,6 +28,20 @@ public class DBColumnMetadata {
     private Integer columnSize;
     private int decimalDigits;
     private boolean nullable;
+
+    public DBColumnMetadata() {
+    }
+
+    public DBColumnMetadata(String tableName, String columnName, int sqlType, String sqlTypeName, Integer columnSize, int decimalDigits, boolean nullable) {
+        super();
+        this.tableName = tableName;
+        this.columnName = columnName;
+        this.sqlType = sqlType;
+        this.sqlTypeName = sqlTypeName;
+        this.columnSize = columnSize;
+        this.decimalDigits = decimalDigits;
+        this.nullable = nullable;
+    }
 
     public String getTableName() {
         return tableName;

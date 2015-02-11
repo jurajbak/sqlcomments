@@ -2,6 +2,7 @@ package sk.vracon.sqlcomments.maven.domain.sqlcomments;
 
 import java.sql.Blob;
 
+import sk.vracon.sqlcomments.core.DBColumnMetadata;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -12,6 +13,16 @@ import sk.vracon.sqlcomments.core.StatementConfiguration;
 public class DocumentConfig implements StatementConfiguration {
 
 	private static final Class<?> BASE_CLASS = sk.vracon.sqlcomments.maven.domain.Document.class;
+	
+	public static final DBColumnMetadata COLUMN_DATA = new DBColumnMetadata("DOCUMENTS", "DATA", 2004, "BLOB", 1073741824, 0, true);
+	
+	public static final DBColumnMetadata COLUMN_DESCRIPTION = new DBColumnMetadata("DOCUMENTS", "DESCRIPTION", 12, "VARCHAR", 500, 0, true);
+	
+	public static final DBColumnMetadata COLUMN_ID = new DBColumnMetadata("DOCUMENTS", "ID", 4, "INTEGER", 32, 0, false);
+	
+	public static final DBColumnMetadata COLUMN_NAME = new DBColumnMetadata("DOCUMENTS", "NAME", 12, "VARCHAR", 50, 0, true);
+	
+	public static final DBColumnMetadata COLUMN_USERID = new DBColumnMetadata("DOCUMENTS", "USERID", 4, "INTEGER", 32, 0, true);
 	
 	public static final String[] PRIMARY_KEY = new String[] {"ID"};	
 

@@ -25,11 +25,14 @@ import java.util.Map;
 
 import org.apache.maven.plugin.logging.Log;
 
+import sk.vracon.sqlcomments.core.Utils;
 import sk.vracon.sqlcomments.maven.generate.AbstractStatementContext;
 import sk.vracon.sqlcomments.maven.generate.PlaceholderInfo;
+import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import freemarker.template.TemplateModelException;
 
 public class TemplateProcessor {
 
@@ -53,11 +56,12 @@ public class TemplateProcessor {
 
     private Configuration configuration = new Configuration(Configuration.VERSION_2_3_21);
 
-    public TemplateProcessor(Log log) {
+    public TemplateProcessor(Log log) throws TemplateModelException {
         this.log = log;
 
         configuration.setDefaultEncoding("UTF-8");
         configuration.setClassForTemplateLoading(TemplateProcessor.class, "/");
+        configuration.setSharedVariable("utils", new BeansWrapperBuilder(Configuration.getVersion()).build().getStaticModels().get(Utils.class.getName()));
     }
 
     public void populateResultTemplate(File outputDirectory, String className, AbstractStatementContext selectContext, StatementDeclaration declaration,
@@ -118,10 +122,10 @@ public class TemplateProcessor {
 
         Map<String, Object> data = createGenericData(packageName, simpleClassName, declaration);
         data.put("placeholders", placeholders);
-        if(extraTemplateModel != null) {
+        if (extraTemplateModel != null) {
             data.putAll(extraTemplateModel);
         }
- 
+
         // Create file name and write file
         String fileName = className.replace('.', File.separatorChar) + ".java";
 

@@ -8,8 +8,8 @@ import java.util.Set;
 
 import org.apache.maven.plugin.logging.Log;
 
+import sk.vracon.sqlcomments.core.DBColumnMetadata;
 import sk.vracon.sqlcomments.maven.generate.AbstractStatementContext;
-import sk.vracon.sqlcomments.maven.generate.DBColumnMetadata;
 import sk.vracon.sqlcomments.maven.generate.PlaceholderInfo;
 import sk.vracon.sqlcomments.maven.generate.ResultColumnInfo;
 import sk.vracon.sqlcomments.maven.generate.SelectContext;
