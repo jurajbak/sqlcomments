@@ -42,7 +42,7 @@ import org.codehaus.plexus.util.DirectoryScanner;
 import sk.vracon.sqlcomments.core.Constants;
 import sk.vracon.sqlcomments.maven.java.Java8Lexer;
 
-@Mojo(name = "export", defaultPhase = LifecyclePhase.GENERATE_RESOURCES, requiresProject = true)
+@Mojo(name = "export", defaultPhase = LifecyclePhase.GENERATE_SOURCES, requiresProject = true)
 public class ExportMojo extends AbstractMojo {
 
     private static final String[] DEFAULT_INCLUDES = {"**/*.java"};

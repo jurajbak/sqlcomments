@@ -169,6 +169,14 @@ public class GenerateMojoTest extends AbstractMojoTest {
         compareJavaFiles("sqlcomments/DeleteWithInnerSelectConfig");
     }
     
+    @Test
+    public void testUpdateInSelect() throws Exception {
+        GenerateMojo mojo = createMojo("updateInSelect.sql");
+
+        mojo.execute();
+
+        compareJavaFiles("sqlcomments/UpdateInSelectConfig");
+    }
     
     @SuppressWarnings("serial")
     private GenerateMojo createMojo(String sqlFile) {
