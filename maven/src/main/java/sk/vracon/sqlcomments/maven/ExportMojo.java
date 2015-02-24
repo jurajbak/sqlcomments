@@ -45,6 +45,8 @@ import sk.vracon.sqlcomments.maven.java.Java8Lexer;
 @Mojo(name = "export", defaultPhase = LifecyclePhase.GENERATE_SOURCES, requiresProject = true)
 public class ExportMojo extends AbstractMojo {
 
+    private static final String LINE_SEPARATOR = System.getProperty("line.separator");
+    
     private static final String[] DEFAULT_INCLUDES = {"**/*.java"};
 
     /**
@@ -223,7 +225,7 @@ public class ExportMojo extends AbstractMojo {
                 } else {
                     // Part of SQL statement
                     statementText.append(line);
-                    statementText.append("\n");
+                    statementText.append(LINE_SEPARATOR);
                 }
             }
         }
@@ -256,7 +258,7 @@ public class ExportMojo extends AbstractMojo {
             fw.write(declaration.getBaseClassName());
             fw.write(":");
             fw.write(Integer.toString(declaration.getDeclarationLineNumber()));
-            fw.write("\n");
+            fw.write(LINE_SEPARATOR);
 
             // Write declaration
             fw.write("-- ");
@@ -266,7 +268,7 @@ public class ExportMojo extends AbstractMojo {
             addComma = writeParameter(fw, Constants.PARAM_BASECLASS, declaration.getBaseClassName(), false, addComma);
             addComma = writeParameter(fw, Constants.PARAM_RESULTCLASS, declaration.getResultClassName(), declaration.isDefaultResultClass(), addComma);
             writeParameter(fw, Constants.PARAM_CONFIGCLASS, declaration.getConfigurationClassName(), declaration.isDefaultConfigurationClass(), addComma);
-            fw.write(")\n");
+            fw.write(")" + LINE_SEPARATOR);
 
             // Write SQL statement
             fw.write(declaration.getStatementText());
