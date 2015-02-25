@@ -20,8 +20,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.StringReader;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Driver;
@@ -56,10 +54,9 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.util.FileUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-
-import freemarker.template.TemplateModelException;
 
 import sk.vracon.sqlcomments.core.Constants;
 import sk.vracon.sqlcomments.core.DBColumnMetadata;
@@ -84,6 +81,7 @@ import sk.vracon.sqlcomments.maven.sql.SQLParser;
 import sk.vracon.sqlcomments.maven.sql.SQLParser.Column_referenceContext;
 import sk.vracon.sqlcomments.maven.sql.SQLParser.Row_value_predicandContext;
 import sk.vracon.sqlcomments.maven.sql.SQLParser.SqlContext;
+import freemarker.template.TemplateModelException;
 
 /**
  * Abstract MOJO implementing generating result and configuration classes.
@@ -352,7 +350,7 @@ public abstract class AbstractSqlCommentsMojo extends AbstractMojo {
 
         try {
             // Load whole file into string
-            String fileContent = new String(Files.readAllBytes(file.toPath()), Charset.defaultCharset());
+            String fileContent = FileUtils.fileRead(file);
 
             // Open reader to read declaration first
             LineNumberReader reader = new LineNumberReader(new StringReader(fileContent));
