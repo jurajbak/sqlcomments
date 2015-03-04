@@ -17,16 +17,19 @@ package sk.vracon.sqlcomments.spring;
 
 import java.lang.reflect.Constructor;
 import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.PreparedStatementCallback;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 
 import sk.vracon.sqlcomments.core.ResultMapper;
@@ -145,56 +148,57 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
      * @param configuration
      *            statement configuration (usually &lt;T&gt;PKConfig)
      */
-    protected void delete(StatementConfiguration configuration) {
+    protected void delete(final StatementConfiguration configuration) {
 
-        Set<String> acceptNullParameters = configuration.generateParameterMap().keySet();
+        getJdbcTemplate().execute(new PreparedStatementCreator() {
+            public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+                Set<String> acceptNullParameters = configuration.generateParameterMap().keySet();
 
-        PreparedStatement stmt = createPreparedStatement(configuration.baseClass(), "delete", configuration.generateParameterMap(), acceptNullParameters, null);
-
-        try {
-            stmt.executeUpdate();
-        }
-        catch (SQLException e) {
-            throw new StatementException("Error while executing statement: " + e.getMessage(), e);
-        }
-        finally {
-            close(stmt);
-        }
+                return AbstractSQLCommentsRepository.this.createPreparedStatement(con, configuration.baseClass(), "delete",
+                        configuration.generateParameterMap(), acceptNullParameters, null);
+            }
+        }, new PreparedStatementCallback<Object>() {
+            public Object doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException {
+                ps.executeUpdate();
+                return null;
+            }
+        });
     }
 
-    private <T> void executeCRUDOperation(String crudType, boolean replaceKeys, T domain) {
+    private <T> void executeCRUDOperation(String crudType, final boolean replaceKeys, final T domain) {
 
-        StatementConfiguration configuration = createConfiguration(crudType, domain);
+        final StatementConfiguration configuration = createConfiguration(crudType, domain);
 
-        Set<String> acceptNullParameters = configuration.generateParameterMap().keySet();
+        getJdbcTemplate().execute(new PreparedStatementCreator() {
+            public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+                Set<String> acceptNullParameters = configuration.generateParameterMap().keySet();
 
-        String[] keys = null;
-        if (replaceKeys) {
-            try {
-                keys = (String[]) configuration.getClass().getField("PRIMARY_KEY").get(null);
+                String[] keys = null;
+                if (replaceKeys) {
+                    try {
+                        keys = (String[]) configuration.getClass().getField("PRIMARY_KEY").get(null);
+                    }
+                    catch (Exception e) {
+                        throw new IllegalStateException("Unable to get value of static field " + configuration.getClass().getName() + ".PRIMARY_KEY. Cause: "
+                                + e.getMessage(), e);
+                    }
+                }
+
+                return AbstractSQLCommentsRepository.this.createPreparedStatement(con, configuration.baseClass(), configuration.statementName(),
+                        configuration.generateParameterMap(), acceptNullParameters, keys);
             }
-            catch (Exception e) {
-                throw new IllegalStateException("Unable to get value of static field " + configuration.getClass().getName() + ".PRIMARY_KEY. Cause: "
-                        + e.getMessage(), e);
+        }, new PreparedStatementCallback<Object>() {
+            public Object doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException {
+
+                ps.executeUpdate();
+
+                if (replaceKeys) {
+                    replaceKeys(domain, ps);
+                }
+
+                return null;
             }
-        }
-
-        PreparedStatement stmt = createPreparedStatement(configuration.baseClass(), configuration.statementName(), configuration.generateParameterMap(),
-                acceptNullParameters, keys);
-
-        try {
-            stmt.executeUpdate();
-
-            if (replaceKeys) {
-                replaceKeys(domain, stmt);
-            }
-        }
-        catch (SQLException e) {
-            throw new StatementException("Error while executing statement: " + e.getMessage(), e);
-        }
-        finally {
-            close(stmt);
-        }
+        });
     }
 
     private <T> void replaceKeys(T domain, PreparedStatement stmt) throws SQLException {
@@ -249,39 +253,16 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
      * @throws StatementException
      *             thrown if JDBC call or transformation failed
      */
-    @SuppressWarnings("unchecked")
-    protected <T> List<T> list(StatementConfiguration configuration, ResultMapper<T> mapper) throws StatementException {
-        PreparedStatement stmt = createPreparedStatement(configuration);
-
-        boolean hasResult;
-        try {
-            hasResult = stmt.execute();
-
-            if (hasResult) {
-                ResultSet resultSet = null;
-                try {
-                    resultSet = stmt.getResultSet();
-
-                    List<T> results = new LinkedList<T>();
-                    while (resultSet.next()) {
-                        T value = mapper.transform(resultSet);
-                        results.add(value);
-                    }
-                    return results;
-                }
-                finally {
-                    close(resultSet);
-                }
+    protected <T> List<T> list(final StatementConfiguration configuration, final ResultMapper<T> mapper) throws StatementException {
+        return getJdbcTemplate().query(new PreparedStatementCreator() {
+            public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+                return AbstractSQLCommentsRepository.this.createPreparedStatement(con, configuration);
             }
-
-            return Collections.EMPTY_LIST;
-        }
-        catch (SQLException e) {
-            throw new StatementException("Error while executing statement: " + e.getMessage(), e);
-        }
-        finally {
-            close(stmt);
-        }
+        }, new RowMapper<T>() {
+            public T mapRow(ResultSet rs, int rowNum) throws SQLException {
+                return mapper.transform(rs);
+            }
+        });
     }
 
     /**
@@ -297,58 +278,25 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
      * @throws StatementException
      *             thrown if JDBC call or transformation failed or non-unique result
      */
-    protected <T> T singleResult(StatementConfiguration configuration, ResultMapper<T> mapper) throws StatementException {
-        PreparedStatement stmt = createPreparedStatement(configuration);
-
-        boolean hasResult;
-        try {
-            hasResult = stmt.execute();
-
-            T value = null;
-
-            if (hasResult) {
-                ResultSet resultSet = null;
-                try {
-                    resultSet = stmt.getResultSet();
-
-                    if (resultSet.next()) {
-                        value = mapper.transform(resultSet);
-                    }
-                    if (resultSet.next()) {
-                        throw new StatementException("Non unique result.");
-                    }
-                }
-                finally {
-                    close(resultSet);
-                }
+    protected <T> T singleResult(final StatementConfiguration configuration, final ResultMapper<T> mapper) throws StatementException {
+        List<T> result = getJdbcTemplate().query(new PreparedStatementCreator() {
+            public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+                return AbstractSQLCommentsRepository.this.createPreparedStatement(con, configuration);
             }
+        }, new RowMapper<T>() {
+            public T mapRow(ResultSet rs, int rowNum) throws SQLException {
+                if (rowNum > 1) {
+                    throw new StatementException("Non unique result.");
+                }
+                return mapper.transform(rs);
+            }
+        });
 
-            return value;
+        if (result.size() == 1) {
+            return result.get(0);
+        } else {
+            return null;
         }
-        catch (SQLException e) {
-            throw new StatementException("Error while executing statement: " + e.getMessage(), e);
-        }
-        finally {
-            close(stmt);
-        }
-    }
-
-    /**
-     * Creates prepared statement.]
-     * <p>
-     * As a base class is used <i>this</i>.
-     * </p>
-     * 
-     * @param statementName
-     *            statement simple name
-     * @param parameters
-     *            parameters
-     * @return prepared statement
-     * @throws StatementException
-     *             thrown if statement creation failed
-     */
-    protected PreparedStatement createPreparedStatement(String statementName, Map<String, Object> parameters) throws StatementException {
-        return createPreparedStatement(this.getClass(), statementName, parameters, null, null);
     }
 
     /**
@@ -357,43 +305,24 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
      * As a base class is used <i>this</i>.
      * </p>
      * 
-     * @param statementName
-     *            statement simple name
-     * @param parameters
-     *            parameters
-     * @param acceptNullParameters
-     *            parameter names accepting null values
-     * @return prepared statement
-     * @throws StatementException
-     *             thrown if statement creation failed
-     */
-    protected PreparedStatement createPreparedStatement(String statementName, Map<String, Object> parameters, Set<String> acceptNullParameters)
-            throws StatementException {
-        return createPreparedStatement(this.getClass(), statementName, parameters, acceptNullParameters, null);
-    }
-
-    /**
-     * Creates prepared statement.
-     * <p>
-     * As a base class is used <i>this</i>.
-     * </p>
-     * 
+     * @param connection
+     *            JDBC connection. Caller is responsible to return connection to pool if necessary.
      * @param configuration
      *            statement configuration
      * @return prepared statement
      * @throws StatementException
      *             thrown if statement creation failed
      */
-    protected PreparedStatement createPreparedStatement(StatementConfiguration configuration) {
+    protected PreparedStatement createPreparedStatement(Connection connection, StatementConfiguration configuration) {
         if (configuration == null) {
             throw new IllegalArgumentException("Configuration must be set.");
         }
 
-        return createPreparedStatement(configuration.baseClass(), configuration.statementName(), configuration.generateParameterMap(),
+        return createPreparedStatement(connection, configuration.baseClass(), configuration.statementName(), configuration.generateParameterMap(),
                 configuration.generateParametersAcceptingNull(), null);
     }
 
-    private PreparedStatement createPreparedStatement(Class<?> baseClass, String statementName, Map<String, Object> parameters,
+    private PreparedStatement createPreparedStatement(Connection connection, Class<?> baseClass, String statementName, Map<String, Object> parameters,
             Set<String> acceptNullParameters, String[] keys) {
 
         if (statementName == null) {
@@ -402,7 +331,7 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
 
         Statement statement = statementContainer.getStatement(baseClass, statementName);
 
-        return statementGenerator.createPreparedStatement(getConnection(), statement, parameters, acceptNullParameters, keys);
+        return statementGenerator.createPreparedStatement(connection, statement, parameters, acceptNullParameters, keys);
     }
 
     /**
@@ -411,6 +340,8 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
      * As a base class is used <i>this</i>.
      * </p>
      * 
+     * @param connection
+     *            JDBC connection
      * @param statementName
      *            statement simple name
      * @param parameters
@@ -419,8 +350,8 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
      * @throws StatementException
      *             thrown if statement creation failed
      */
-    protected CallableStatement createCallableStatement(String statementName, Map<String, Object> parameters) throws StatementException {
-        return createCallableStatement(this.getClass(), statementName, parameters, null);
+    protected CallableStatement createCallableStatement(Connection connection, String statementName, Map<String, Object> parameters) throws StatementException {
+        return createCallableStatement(connection, this.getClass(), statementName, parameters, null);
     }
 
     /**
@@ -429,6 +360,8 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
      * As a base class is used <i>this</i>.
      * </p>
      * 
+     * @param connection
+     *            JDBC connection
      * @param statementName
      *            statement simple name
      * @param parameters
@@ -439,12 +372,13 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
      * @throws StatementException
      *             thrown if statement creation failed
      */
-    protected CallableStatement createCallableStatement(String statementName, Map<String, Object> parameters, Set<String> acceptNullParameters)
-            throws StatementException {
-        return createCallableStatement(this.getClass(), statementName, parameters, acceptNullParameters);
+    protected CallableStatement createCallableStatement(Connection connection, String statementName, Map<String, Object> parameters,
+            Set<String> acceptNullParameters) throws StatementException {
+        return createCallableStatement(connection, this.getClass(), statementName, parameters, acceptNullParameters);
     }
 
-    private CallableStatement createCallableStatement(Class<?> baseClass, String statementName, Map<String, Object> parameters, Set<String> acceptNullParameters) {
+    private CallableStatement createCallableStatement(Connection connection, Class<?> baseClass, String statementName, Map<String, Object> parameters,
+            Set<String> acceptNullParameters) {
 
         if (statementName == null) {
             throw new IllegalArgumentException("Statement name must be set.");
@@ -452,7 +386,7 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
 
         Statement statement = statementContainer.getStatement(baseClass, statementName);
 
-        return statementGenerator.createPreparedCall(getConnection(), statement, parameters, acceptNullParameters);
+        return statementGenerator.createPreparedCall(connection, statement, parameters, acceptNullParameters);
     }
 
     /**
@@ -465,56 +399,16 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
      * @param config
      *            statement configuration
      */
-    protected void executeStatement(StatementConfiguration config) {
-        PreparedStatement statement = createPreparedStatement(config);
-
-        try {
-            statement.execute();
-        }
-        catch (SQLException e) {
-            throw new StatementException("Error while executing statement: " + e.getMessage(), e);
-        }
-        finally {
-            close(statement);
-        }
-    }
-
-    /**
-     * Helper method for closing result set.
-     * 
-     * @param rs
-     *            result set to close
-     */
-    protected void close(ResultSet rs) {
-        if (rs == null) {
-            return;
-        }
-
-        try {
-            rs.close();
-        }
-        catch (Exception e) {
-            throw new StatementException("Closing ResultSet failed: " + e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Helper method for closing prepared statement.
-     * 
-     * @param stmt
-     *            prepared statement to close
-     */
-    protected void close(PreparedStatement stmt) {
-        if (stmt == null) {
-            return;
-        }
-
-        try {
-            stmt.close();
-        }
-        catch (Exception e) {
-            throw new StatementException("Closing CallableStatement failed: " + e.getMessage(), e);
-        }
+    protected void executeStatement(final StatementConfiguration config) {
+        getJdbcTemplate().execute(new PreparedStatementCreator() {
+            public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+                return AbstractSQLCommentsRepository.this.createPreparedStatement(con, config);
+            }
+        }, new PreparedStatementCallback<Boolean>() {
+            public Boolean doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException {
+                return ps.execute();
+            }
+        });
     }
 
     /**
