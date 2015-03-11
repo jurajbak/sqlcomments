@@ -59,7 +59,19 @@ public class ${simpleClassName} implements StatementConfiguration {
 		}
 		
 		<#if placeholder.mapperClass?has_content>
+			<#if placeholder.collection>
+		if(value == null) {
+			__sqlParameters.put("${placeholder.name}", ${placeholder.name}ColumnMapper.convertToDatabase(null));
+		} else {
+			Set converted = new HashSet(value.size()); 
+			for (${templateUtils.getSimpleClassName(placeholder.mappedClass)} item : value) {
+			    converted.add(${placeholder.name}ColumnMapper.convertToDatabase(item));
+	        }
+			__sqlParameters.put("${placeholder.name}", converted);
+		}
+			<#else>
 		__sqlParameters.put("${placeholder.name}", ${placeholder.name}ColumnMapper.convertToDatabase(value));
+			</#if>
 		<#else> 
 		__sqlParameters.put("${placeholder.name}", value);
 		</#if> 

@@ -178,6 +178,15 @@ public class GenerateMojoTest extends AbstractMojoTest {
         compareJavaFiles("sqlcomments/UpdateInSelectConfig");
     }
     
+    @Test
+    public void testSelectWithCollectionAndMapper() throws Exception {
+        GenerateMojo mojo = createMojo("selectWithCollectionAndMapper.sql");
+
+        mojo.execute();
+
+        compareAllJavaFiles("SelectWithCollectionAndMapper");
+    }
+    
     @SuppressWarnings("serial")
     private GenerateMojo createMojo(String sqlFile) {
         GenerateMojo mojo = new GenerateMojo();
