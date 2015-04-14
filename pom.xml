@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>sk.vracon.sqlcomments</groupId>
 	<artifactId>sqlcomments</artifactId>
-	<version>0.0.3-SNAPSHOT</version>
+	<version>0.0.3-multidb-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>SQL Comments Parent POM</name>
