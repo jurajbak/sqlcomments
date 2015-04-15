@@ -25,6 +25,7 @@ public class StatementDeclaration {
     private String configurationClassName;
     private boolean defaultConfigurationClass;
     private String statementText;
+    private String database;
 
     /**
      * @return the declarationLineNumber
@@ -146,6 +147,21 @@ public class StatementDeclaration {
         this.statementText = statementText;
     }
 
+    /**
+     * @return the database
+     */
+    public String getDatabase() {
+        return database;
+    }
+
+    /**
+     * @param database
+     *            the database to set
+     */
+    public void setDatabase(String database) {
+        this.database = database;
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -156,6 +172,8 @@ public class StatementDeclaration {
         StringBuilder builder = new StringBuilder();
         builder.append("StatementDeclaration [declarationLineNumber=");
         builder.append(declarationLineNumber);
+        builder.append(", database=");
+        builder.append(database);
         builder.append(", baseClassName=");
         builder.append(baseClassName);
         builder.append(", name=");

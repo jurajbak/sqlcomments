@@ -58,6 +58,11 @@ public class Constants {
     public static final String PARAM_BASECLASS = "baseClass";
 
     /**
+     * Name of parameter 'database' in SQLComment directive.
+     */
+    public static final String PARAM_DATABASE = "database";
+
+    /**
      * Token marking start of replacement.
      */
     public static final String REPLACEMENT_START_TOKEN = "${";
