@@ -23,6 +23,8 @@ import java.util.Scanner;
 import javax.script.Compilable;
 import javax.script.ScriptEngineManager;
 
+import sk.vracon.sqlcomments.core.dialect.DatabaseDialect;
+
 /**
  * Statement container implements loading and caching of statements.
  * 
@@ -56,7 +58,7 @@ public class StatementContainer {
     private static final String DEFAULT_SCRIPT_ENGINE = "javascript";
 
     private boolean enableCache = true;
-    private String databaseProductName = null;
+    private DatabaseDialect dialect;
     private Compilable scriptEngine;
     private Map<String, Statement> statements = new HashMap<String, Statement>();
 
@@ -148,11 +150,11 @@ public class StatementContainer {
 
         InputStream input = null;
 
-        if (databaseProductName != null) {
+        if (dialect != null) {
             // Try to load database specific file first
             int suffixPos = fullName.lastIndexOf('.');
-            if(suffixPos > -1) {
-                String dbSpecificName = fullName.substring(0, suffixPos) + "." + databaseProductName + fullName.substring(suffixPos);
+            if (suffixPos > -1) {
+                String dbSpecificName = fullName.substring(0, suffixPos) + "." + dialect.getDatabaseProductName() + fullName.substring(suffixPos);
                 input = classLoader.getResourceAsStream(dbSpecificName);
             }
         }
@@ -297,12 +299,12 @@ public class StatementContainer {
     }
 
     /**
-     * Sets database product name.
+     * Sets database dialect.
      * 
-     * @param databaseProductName
-     *            database product name or <code>null</code>.
+     * @param dialect
+     *            database dialect or <code>null</code>.
      */
-    public void setDatabaseProductName(String databaseProductName) {
-        this.databaseProductName = databaseProductName;
+    public void setDialect(DatabaseDialect dialect) {
+        this.dialect = dialect;
     }
 }

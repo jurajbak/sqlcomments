@@ -35,6 +35,8 @@ import javax.script.SimpleBindings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sk.vracon.sqlcomments.core.dialect.DatabaseDialect;
+
 /**
  * Utility class to process statement objects and generate JPA and JDBC statements.
  * <p>
@@ -44,6 +46,8 @@ import org.slf4j.LoggerFactory;
 public class StatementGenerator {
 
     private static Logger logger = LoggerFactory.getLogger(StatementGenerator.class);
+
+    private DatabaseDialect dialect;
 
     /**
      * Creates prepared statement for given JDBC connection and parameters.
@@ -58,12 +62,16 @@ public class StatementGenerator {
      *            parameters to use
      * @param acceptNullParameters
      *            names of parameters accepting null values
+     * @param offset
+     *            result set offset
+     * @param limit
+     *            result set limit
      * @param withKeys
      *            if true prepared statement will return auto-generated keys
      */
     public PreparedStatement createPreparedStatement(Connection connection, Statement statement, Map<String, Object> parameters,
-            Set<String> acceptNullParameters, boolean withKeys) throws StatementException {
-        return createPreparedStatement(connection, statement, parameters, acceptNullParameters, withKeys ? new String[0] : null);
+            Set<String> acceptNullParameters, Long offset, Long limit, boolean withKeys) throws StatementException {
+        return createPreparedStatement(connection, statement, parameters, acceptNullParameters, offset, limit, withKeys ? new String[0] : null);
     }
 
     /**
@@ -79,11 +87,15 @@ public class StatementGenerator {
      *            parameters to use
      * @param acceptNullParameters
      *            names of parameters accepting null values
+     * @param offset
+     *            result set offset
+     * @param limit
+     *            result set limit
      * @param keysToGenerate
      *            list of keys to generate
      */
     public PreparedStatement createPreparedStatement(Connection connection, Statement statement, Map<String, Object> parameters,
-            Set<String> acceptNullParameters, String[] keysToGenerate) throws StatementException {
+            Set<String> acceptNullParameters, Long offset, Long limit, String[] keysToGenerate) throws StatementException {
 
         if (connection == null) {
             throw new IllegalArgumentException("Connection must be set.");
@@ -94,7 +106,7 @@ public class StatementGenerator {
 
         // Replace parameter names with question marks to conform JDBC
         List<Object> jdbcParams = new LinkedList<Object>();
-        String jdbcSql = generateJdbcStatement(statement, parameters, acceptNullParameters, jdbcParams);
+        String jdbcSql = generateJdbcStatement(statement, parameters, acceptNullParameters, jdbcParams, offset, limit);
 
         logger.debug(jdbcSql);
 
@@ -155,7 +167,7 @@ public class StatementGenerator {
 
         // Replace parameter names with question marks to conform JDBC
         List<Object> jdbcParams = new LinkedList<Object>();
-        String jdbcSql = generateJdbcStatement(statement, parameters, acceptNullParameters, jdbcParams);
+        String jdbcSql = generateJdbcStatement(statement, parameters, acceptNullParameters, jdbcParams, null, null);
 
         logger.debug(jdbcSql);
 
@@ -198,14 +210,19 @@ public class StatementGenerator {
      *            names of parameters accepting null values
      * @param jdbcParams
      *            list where will be generated JDBC parameters
+     * @param offset
+     *            result set offset
+     * @param limit
+     *            result set limit
      * @return generated JDBC-like statement
      * 
      * @see #generateStatement(Statement, Map, Set)
      */
-    public String generateJdbcStatement(Statement statement, Map<String, Object> parameters, Set<String> acceptNullParameters, List<Object> jdbcParams) {
+    public String generateJdbcStatement(Statement statement, Map<String, Object> parameters, Set<String> acceptNullParameters, List<Object> jdbcParams,
+            Long offset, Long limit) {
         String sql = null;
         try {
-            sql = generateStatement(statement, parameters, acceptNullParameters);
+            sql = generateStatement(statement, parameters, acceptNullParameters, offset, limit);
         }
         catch (ScriptException e) {
             throw new StatementException("Error while generating SQL: " + e.getMessage(), e);
@@ -277,9 +294,14 @@ public class StatementGenerator {
      *            parameters to use
      * @param acceptNullParameters
      *            names of parameters accepting null values
+     * @param offset
+     *            result set offset
+     * @param limit
+     *            result set limit
      * @return constructed statement string without replaced SQL parameters
      */
-    public String generateStatement(Statement statement, Map<String, Object> parameters, Set<String> acceptNullParameters) throws ScriptException {
+    public String generateStatement(Statement statement, Map<String, Object> parameters, Set<String> acceptNullParameters, Long offset, Long limit)
+            throws ScriptException {
 
         // Construct statement string according to given settings
         StringBuilder result = new StringBuilder();
@@ -323,7 +345,11 @@ public class StatementGenerator {
             result.append("\n");
         }
 
-        return result.toString();
+        if (offset == null && limit == null) {
+            return result.toString();
+        } else {
+            return dialect.generateSQLWithOffsetAndLimit(result.toString(), offset, limit);
+        }
     }
 
     private String replaceParameters(Map<String, Object> parameters, RowInfo row) {
@@ -337,5 +363,15 @@ public class StatementGenerator {
             }
         }
         return line;
+    }
+
+    /**
+     * Sets database dialect to use.
+     * 
+     * @param dialect
+     *            database dialect
+     */
+    public void setDialect(DatabaseDialect dialect) {
+        this.dialect = dialect;
     }
 }

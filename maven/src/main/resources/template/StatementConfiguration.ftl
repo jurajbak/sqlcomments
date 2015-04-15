@@ -37,6 +37,9 @@ public class ${simpleClassName} implements StatementConfiguration {
 	private Map<String, Object> __sqlParameters;
 	
 	private Set<String> __acceptNullParameters;
+	
+	private Long limit;
+    private Long offset;
 
 <#list placeholders as placeholder>
 	<#if placeholder.mapperClass?has_content>
@@ -103,4 +106,20 @@ public class ${simpleClassName} implements StatementConfiguration {
 	public Set<String> generateParametersAcceptingNull() {
 		return __acceptNullParameters;
 	}
+
+    public Long limit() {
+        return limit;
+    }
+
+    public void limit(Long limit) {
+        this.limit = limit;
+    }
+
+    public Long offset() {
+        return offset;
+    }
+
+    public void offset(Long offset) {
+        this.offset = offset;
+    }
 }

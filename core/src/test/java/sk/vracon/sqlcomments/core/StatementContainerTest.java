@@ -1,7 +1,12 @@
 package sk.vracon.sqlcomments.core;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
 import org.junit.Test;
+
+import sk.vracon.sqlcomments.core.dialect.OracleDialect;
 
 public class StatementContainerTest {
 
@@ -51,7 +56,7 @@ public class StatementContainerTest {
     public void testGetStatement_SpecificDB() {
 
         StatementContainer container = new StatementContainer();
-        container.setDatabaseProductName("oracle");
+        container.setDialect(new OracleDialect());
 
         Statement statement = container.getStatement(this.getClass().getClassLoader(), "sk/vracon/sqlcomments/core/select1.sql");
 

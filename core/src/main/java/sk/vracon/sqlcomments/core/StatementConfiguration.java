@@ -98,4 +98,33 @@ public interface StatementConfiguration {
      */
     public Set<String> generateParametersAcceptingNull();
 
+    /**
+     * Gets maximum number of rows to be loaded.
+     * 
+     * @return limit
+     */
+    public Long limit();
+
+    /**
+     * Sets maximum number of rows to be loaded.
+     * 
+     * @param limit
+     *            limit
+     */
+    public void limit(Long limit);
+
+    /**
+     * Gets result set offset.
+     * 
+     * @return offset
+     */
+    public Long offset();
+
+    /**
+     * Sets result set offset.
+     * 
+     * @param offset
+     *            offset
+     */
+    public void offset(Long offset);
 }

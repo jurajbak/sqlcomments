@@ -39,6 +39,7 @@ import sk.vracon.sqlcomments.core.StatementContainer;
 import sk.vracon.sqlcomments.core.StatementException;
 import sk.vracon.sqlcomments.core.StatementGenerator;
 import sk.vracon.sqlcomments.core.Utils;
+import sk.vracon.sqlcomments.core.dialect.DatabaseDialect;
 
 /**
  * Abstract spring repository with implemented CRUD operations.
@@ -155,7 +156,7 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
                 Set<String> acceptNullParameters = configuration.generateParameterMap().keySet();
 
                 return AbstractSQLCommentsRepository.this.createPreparedStatement(con, configuration.baseClass(), "delete",
-                        configuration.generateParameterMap(), acceptNullParameters, null);
+                        configuration.generateParameterMap(), acceptNullParameters, configuration.offset(), configuration.limit(), null);
             }
         }, new PreparedStatementCallback<Object>() {
             public Object doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException {
@@ -185,7 +186,7 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
                 }
 
                 return AbstractSQLCommentsRepository.this.createPreparedStatement(con, configuration.baseClass(), configuration.statementName(),
-                        configuration.generateParameterMap(), acceptNullParameters, keys);
+                        configuration.generateParameterMap(), acceptNullParameters, configuration.offset(), configuration.limit(), keys);
             }
         }, new PreparedStatementCallback<Object>() {
             public Object doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException {
@@ -319,11 +320,11 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
         }
 
         return createPreparedStatement(connection, configuration.baseClass(), configuration.statementName(), configuration.generateParameterMap(),
-                configuration.generateParametersAcceptingNull(), null);
+                configuration.generateParametersAcceptingNull(), configuration.offset(), configuration.limit(), null);
     }
 
     private PreparedStatement createPreparedStatement(Connection connection, Class<?> baseClass, String statementName, Map<String, Object> parameters,
-            Set<String> acceptNullParameters, String[] keys) {
+            Set<String> acceptNullParameters, Long offset, Long limit, String[] keys) {
 
         if (statementName == null) {
             throw new IllegalArgumentException("Statement name must be set.");
@@ -331,7 +332,7 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
 
         Statement statement = statementContainer.getStatement(baseClass, statementName);
 
-        return statementGenerator.createPreparedStatement(connection, statement, parameters, acceptNullParameters, keys);
+        return statementGenerator.createPreparedStatement(connection, statement, parameters, acceptNullParameters, offset, limit, keys);
     }
 
     /**
@@ -428,5 +429,15 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
      */
     public void setStatementContainer(StatementContainer statementContainer) {
         this.statementContainer = statementContainer;
+    }
+
+    /**
+     * Sets database dialect to use.
+     * 
+     * @param dialect
+     *            database dialect
+     */
+    public void setDialect(DatabaseDialect dialect) {
+        statementGenerator.setDialect(dialect);
     }
 }
