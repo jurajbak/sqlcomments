@@ -31,6 +31,7 @@ import sk.vracon.sqlcomments.maven.sqlcomments.SQLCommentsParser;
 import sk.vracon.sqlcomments.maven.sqlcomments.SQLCommentsParser.BaseClassParamContext;
 import sk.vracon.sqlcomments.maven.sqlcomments.SQLCommentsParser.CommentNameContext;
 import sk.vracon.sqlcomments.maven.sqlcomments.SQLCommentsParser.ConfigClassParamContext;
+import sk.vracon.sqlcomments.maven.sqlcomments.SQLCommentsParser.DatabaseContext;
 import sk.vracon.sqlcomments.maven.sqlcomments.SQLCommentsParser.DeclarationContext;
 import sk.vracon.sqlcomments.maven.sqlcomments.SQLCommentsParser.ResultClassParamContext;
 
@@ -86,6 +87,11 @@ public class StatementDeclarationParser {
             @Override
             public void enterBaseClassParam(BaseClassParamContext ctx) {
                 declaration.setBaseClassName(ctx.className().getText());
+            }
+            
+            @Override
+            public void enterDatabase(DatabaseContext ctx) {
+                declaration.setDatabase(ctx.Identifier().getText().toLowerCase());
             }
 
         }, declarationContext);

@@ -27,8 +27,16 @@ import javax.script.ScriptEngineManager;
  * Statement container implements loading and caching of statements.
  * 
  * <p>
- * Statement container is not mandatory, but it has some useful features like caching and takes care of compiling
- * control scripts.
+ * Statement container is not mandatory, but it has some useful features like loading, caching and takes care of
+ * compiling control scripts.
+ * </p>
+ * <p>
+ * Statement files are loaded from classpath in order:
+ * <ol>
+ * <li>Database specific statement file (if {@link #databaseProductName} is <code>null</code> this step is skipped).</li>
+ * <li>Generic statement file (without database product name).</li>
+ * </ol>
+ * If no statement file is found, {@link IllegalArgumentException} is thrown.
  * </p>
  * <p>
  * The default script engine for control scripts is used JavaScript. All scripts are compiled before first usage. It is
@@ -48,6 +56,7 @@ public class StatementContainer {
     private static final String DEFAULT_SCRIPT_ENGINE = "javascript";
 
     private boolean enableCache = true;
+    private String databaseProductName = null;
     private Compilable scriptEngine;
     private Map<String, Statement> statements = new HashMap<String, Statement>();
 
@@ -104,10 +113,12 @@ public class StatementContainer {
      * @param name
      *            statement name (mandatory)
      * @return loaded statement
+     * @throws StatementNotFoundException
+     *             if statement file not found
      * 
      * @see StatementConfiguration
      */
-    public Statement addStatement(Class<?> baseClass, String name) {
+    public Statement addStatement(Class<?> baseClass, String name) throws StatementNotFoundException {
         if (baseClass == null) {
             throw new IllegalArgumentException("Base class must be must be set.");
         }
@@ -130,12 +141,29 @@ public class StatementContainer {
      * @param fullName
      *            full file name
      * @return loaded file as a String
+     * @throws StatementNotFoundException
+     *             if statement file not found
      */
-    private String loadStatement(ClassLoader classLoader, String fullName) {
-        InputStream input = classLoader.getResourceAsStream(fullName);
+    private String loadStatement(ClassLoader classLoader, String fullName) throws StatementNotFoundException {
+
+        InputStream input = null;
+
+        if (databaseProductName != null) {
+            // Try to load database specific file first
+            int suffixPos = fullName.lastIndexOf('.');
+            if(suffixPos > -1) {
+                String dbSpecificName = fullName.substring(0, suffixPos) + "." + databaseProductName + fullName.substring(suffixPos);
+                input = classLoader.getResourceAsStream(dbSpecificName);
+            }
+        }
 
         if (input == null) {
-            throw new IllegalStateException("No statement file found: " + fullName);
+            // Load generic file
+            input = classLoader.getResourceAsStream(fullName);
+        }
+
+        if (input == null) {
+            throw new StatementNotFoundException("Statement file found: " + fullName);
         }
 
         // Read input into string
@@ -176,6 +204,7 @@ public class StatementContainer {
      */
     public Statement addStatement(String statementName, String statementText) {
         Statement statement = new StatementParser().parseStatement(statementText, scriptEngine);
+        statement.setName(statementName);
 
         if (enableCache) {
             statements.put(statementName, statement);
@@ -196,7 +225,7 @@ public class StatementContainer {
      *            statement simple name
      * @return statement
      */
-    public Statement getStatement(Class<?> baseClass, String name) {
+    public Statement getStatement(Class<?> baseClass, String name) throws IllegalArgumentException {
         if (baseClass == null) {
             throw new IllegalArgumentException("Base class must be must be set.");
         }
@@ -219,8 +248,10 @@ public class StatementContainer {
      * @param fullName
      *            statement full file name
      * @return statement
+     * @throws StatementNotFoundException
+     *             if statement file not found
      */
-    public Statement getStatement(ClassLoader classLoader, String fullName) {
+    public Statement getStatement(ClassLoader classLoader, String fullName) throws StatementNotFoundException {
         // Get statement from cache
         Statement statement = statements.get(fullName);
 
@@ -263,5 +294,15 @@ public class StatementContainer {
      */
     public void setEnableCache(boolean enableCache) {
         this.enableCache = enableCache;
+    }
+
+    /**
+     * Sets database product name.
+     * 
+     * @param databaseProductName
+     *            database product name or <code>null</code>.
+     */
+    public void setDatabaseProductName(String databaseProductName) {
+        this.databaseProductName = databaseProductName;
     }
 }

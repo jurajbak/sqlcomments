@@ -34,6 +34,7 @@ public class StatementDeclarationParserTest {
         Assert.assertTrue(declaration.isDefaultResultClass());
         Assert.assertNull(declaration.getConfigurationClassName());
         Assert.assertFalse(declaration.isDefaultConfigurationClass());
+        Assert.assertNull(declaration.getDatabase());
     }
 
     @Test
@@ -50,12 +51,13 @@ public class StatementDeclarationParserTest {
         Assert.assertFalse(declaration.isDefaultResultClass());
         Assert.assertNull(declaration.getConfigurationClassName());
         Assert.assertTrue(declaration.isDefaultConfigurationClass());
+        Assert.assertNull(declaration.getDatabase());
     }
 
     @Test
     public void test3() throws Exception {
 
-        String text = "@SQLComment(name=\"simpleSelect\", baseClass=\"sk.vracon.BaseClass\", resultClass =\"sk.vracon.Result\", configClass=\"sk.vracon.Config\")";
+        String text = "@SQLComment(name=\"simpleSelect\", baseClass=\"sk.vracon.BaseClass\", resultClass =\"sk.vracon.Result\", configClass=\"sk.vracon.Config\", database=\"PostgreSQL\")";
 
         StatementDeclaration declaration = StatementDeclarationParser.parseStatementDeclaration(text);
 
@@ -66,5 +68,6 @@ public class StatementDeclarationParserTest {
         Assert.assertFalse(declaration.isDefaultResultClass());
         Assert.assertEquals("sk.vracon.Config", declaration.getConfigurationClassName());
         Assert.assertFalse(declaration.isDefaultConfigurationClass());
+        Assert.assertEquals("postgresql", declaration.getDatabase());
     }
 }

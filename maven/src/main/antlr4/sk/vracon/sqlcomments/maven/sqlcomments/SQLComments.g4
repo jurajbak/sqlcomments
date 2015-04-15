@@ -16,6 +16,7 @@ parameterDeclaration
     |   baseClassParam
     |   resultClassParam 
     |   configClassParam
+    |   database
     ;
 
 nameParam
@@ -34,6 +35,10 @@ resultClassParam
 configClassParam
     :  'configClass' '=' QUOTATION className QUOTATION
     |  'configClass' '=' 'default'
+    ;
+
+database
+    :  'database' '=' QUOTATION Identifier QUOTATION
     ;
 
 commentName

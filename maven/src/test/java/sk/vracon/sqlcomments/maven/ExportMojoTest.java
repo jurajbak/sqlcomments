@@ -75,6 +75,7 @@ public class ExportMojoTest extends AbstractMojoTest {
     @Test
     public void testInnerComment2() throws IOException {
         compareFiles("SimpleAllOk.innerComment2.sql");
+        compareFiles("SimpleAllOk.innerComment2.postgresql.sql");
     }
 
     @Test
