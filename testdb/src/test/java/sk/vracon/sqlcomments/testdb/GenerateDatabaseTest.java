@@ -46,6 +46,8 @@ public class GenerateDatabaseTest {
 
         // Connect to the database.
         Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
+        
+        System.out.println(connection.getMetaData().getDatabaseProductName());
 
         // Create database
         ScriptUtils.executeSqlScript(connection, new ClassPathResource("schema.sql"));

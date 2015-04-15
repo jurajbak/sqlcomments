@@ -30,6 +30,9 @@ public class DocumentConfig implements StatementConfiguration {
 	
 	private Set<String> __acceptNullParameters;
 	
+	private Long limit;
+    private Long offset;
+
 	private String statementName;
 
 	
@@ -144,4 +147,20 @@ public class DocumentConfig implements StatementConfiguration {
 	public Set<String> generateParametersAcceptingNull() {
 		return __acceptNullParameters;
 	}
+	
+	public Long limit() {
+        return limit;
+    }
+
+    public void limit(Long limit) {
+        this.limit = limit;
+    }
+
+    public Long offset() {
+        return offset;
+    }
+
+    public void offset(Long offset) {
+        this.offset = offset;
+    }
 }

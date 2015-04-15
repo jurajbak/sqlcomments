@@ -27,6 +27,8 @@ public abstract class StatementConfigurationAdapter implements StatementConfigur
 
     private String statementName;
     private Class<?> baseClass;
+    private Long limit;
+    private Long offset;
 
     /**
      * Creates instance of configuration with mandatory fields.
@@ -75,5 +77,21 @@ public abstract class StatementConfigurationAdapter implements StatementConfigur
      */
     public Set<String> generateParametersAcceptingNull() {
         return null;
+    }
+
+    public Long limit() {
+        return limit;
+    }
+
+    public void limit(Long limit) {
+        this.limit = limit;
+    }
+
+    public Long offset() {
+        return offset;
+    }
+
+    public void offset(Long offset) {
+        this.offset = offset;
     }
 }
