@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>sqlcomments</artifactId>
 		<groupId>sk.vracon.sqlcomments</groupId>
-		<version>0.0.3-SNAPSHOT</version>
+		<version>0.0.3-paging-SNAPSHOT</version>
 	</parent>
 
 	<groupId>sk.vracon.sqlcomments</groupId>
