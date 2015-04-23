@@ -52,8 +52,13 @@ public class SimpleAllOk {
             where id = :placeholder 
                and name like 'John %'  -- Condition only if //@ x < 3
             order by name
-        
+
             @SQLComment(name="innerComment2", resultClass="sk.vracon.InnerComment2", configClass="sk.vracon.InnerComment2Config")
+            select * from users 
+            where id = :placeholder
+            order by name
+
+            @SQLComment(name="innerComment2", database="PostgreSQL")
             select * from users 
             where id = :placeholder
             order by name

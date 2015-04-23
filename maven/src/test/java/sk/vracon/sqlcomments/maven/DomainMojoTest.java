@@ -45,10 +45,12 @@ public class DomainMojoTest extends AbstractMojoTest {
         mojo.tables = new HashMap<String, String>() {
             {
                 put("Users", null);
-                put("Companies", null);
-                put("Documents", null);
+                put("Companies", DomainMojo.TABLE_PROP_PK_GENERATOR + "=null\n" + DomainMojo.TABLE_PROP_PK_GENERATOR + ".postgresql=nextval('companies_seq')");
+                put("Documents", DomainMojo.TABLE_PROP_CLASS_NAME + "=sk.vracon.sqlcomments.maven.domain.Document\n" + DomainMojo.TABLE_PROP_INTERFACES
+                        + "=sk.vracon.sqlcomments.maven.IDomain\n" + DomainMojo.TABLE_PROP_PK_GENERATOR + ".postgresql=nextval('documents_seq')");
             }
         };
+        mojo.mappingFiles = new String[] {"**/domain/sqlcomments.xml"};
         mojo.jdbcDriverClass = JDBC_DRIVER;
         mojo.databaseUrl = DB_URL;
         mojo.dbUserName = DB_USERNAME;
@@ -65,11 +67,13 @@ public class DomainMojoTest extends AbstractMojoTest {
     @Test
     public void testCompanies() throws Exception {
         compareAllFiles("Companies");
+        compareFiles(SOURCE_DIR, TARGET_DIR, "Companies.insert.postgresql.sql");
     }
 
     @Test
     public void testDocuments() throws Exception {
-        compareAllFiles("Documents");
+        compareAllFiles("Document");
+        compareFiles(SOURCE_DIR, TARGET_DIR, "Document.insert.postgresql.sql");
     }
 
     private void compareAllFiles(String domainName) throws Exception {

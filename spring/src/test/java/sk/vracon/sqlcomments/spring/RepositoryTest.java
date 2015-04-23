@@ -15,11 +15,8 @@
  */
 package sk.vracon.sqlcomments.spring;
 
-import static org.junit.Assert.assertNotNull;
-
 import java.io.InputStream;
 import java.sql.Blob;
-import java.sql.PreparedStatement;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -33,8 +30,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import sk.vracon.sqlcomments.core.impl.StatementConfigurationAdapter;
 import sk.vracon.sqlcomments.core.impl.ReflectionBeanMapper;
+import sk.vracon.sqlcomments.core.impl.StatementConfigurationAdapter;
 import sk.vracon.sqlcomments.spring.sqlcomments.BlobConfig;
 import sk.vracon.sqlcomments.spring.sqlcomments.BlobTestMapper;
 import sk.vracon.sqlcomments.spring.sqlcomments.FindCompanyConfig;
@@ -50,21 +47,6 @@ import sk.vracon.sqlcomments.spring.sqlcomments.ReplacementTestMapper;
 @ContextConfiguration(classes = {RepositoryConfiguration.class})
 @Repository
 public class RepositoryTest extends GenericTestRepository {
-
-    @Test
-    public void testCreateStatement() throws Exception {
-        /*-
-          @SQLComment(name="getAllCompanies")
-          select * from companies
-         */
-
-        PreparedStatement stmt = createPreparedStatement("getAllCompanies", null);
-
-        assertNotNull(stmt);
-
-        // Execute and see if statement will be processed
-        stmt.execute();
-    }
 
     @Test
     public void testSelectList() throws Exception {

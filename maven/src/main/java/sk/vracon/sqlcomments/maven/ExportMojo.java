@@ -42,9 +42,11 @@ import org.codehaus.plexus.util.DirectoryScanner;
 import sk.vracon.sqlcomments.core.Constants;
 import sk.vracon.sqlcomments.maven.java.Java8Lexer;
 
-@Mojo(name = "export", defaultPhase = LifecyclePhase.GENERATE_RESOURCES, requiresProject = true)
+@Mojo(name = "export", defaultPhase = LifecyclePhase.GENERATE_SOURCES, requiresProject = true)
 public class ExportMojo extends AbstractMojo {
 
+    private static final String LINE_SEPARATOR = System.getProperty("line.separator");
+    
     private static final String[] DEFAULT_INCLUDES = {"**/*.java"};
 
     /**
@@ -223,7 +225,7 @@ public class ExportMojo extends AbstractMojo {
                 } else {
                     // Part of SQL statement
                     statementText.append(line);
-                    statementText.append("\n");
+                    statementText.append(LINE_SEPARATOR);
                 }
             }
         }
@@ -233,16 +235,26 @@ public class ExportMojo extends AbstractMojo {
     }
 
     private void writeStatementFile(String inputFileName, StatementDeclaration declaration) throws IOException {
-        String sqlFileName = inputFileName;
+        // Construct SQL file name
+        StringBuilder sqlFileName = new StringBuilder();
         int suffixPos = inputFileName.lastIndexOf('.');
         if (suffixPos > -1) {
-            sqlFileName = inputFileName.substring(0, suffixPos);
+            sqlFileName.append(inputFileName.substring(0, suffixPos));
+        } else {
+            sqlFileName.append(inputFileName);
         }
-        sqlFileName = sqlFileName + "." + declaration.getName() + ".sql";
-
+        sqlFileName.append(".");
+        sqlFileName.append(declaration.getName());
+        if(declaration.getDatabase() != null) {
+            sqlFileName.append(".");
+            sqlFileName.append(declaration.getDatabase());
+        }
+        sqlFileName.append(".sql");
+        
         getLog().info("Generating file: " + sqlFileName);
 
-        File sqlFile = new File(outputDirectory, sqlFileName);
+        // Write file
+        File sqlFile = new File(outputDirectory, sqlFileName.toString());
         FileWriter fw = null;
         try {
             // Create missing directories
@@ -256,7 +268,7 @@ public class ExportMojo extends AbstractMojo {
             fw.write(declaration.getBaseClassName());
             fw.write(":");
             fw.write(Integer.toString(declaration.getDeclarationLineNumber()));
-            fw.write("\n");
+            fw.write(LINE_SEPARATOR);
 
             // Write declaration
             fw.write("-- ");
@@ -265,8 +277,9 @@ public class ExportMojo extends AbstractMojo {
             boolean addComma = writeParameter(fw, Constants.PARAM_NAME, declaration.getName(), false, false);
             addComma = writeParameter(fw, Constants.PARAM_BASECLASS, declaration.getBaseClassName(), false, addComma);
             addComma = writeParameter(fw, Constants.PARAM_RESULTCLASS, declaration.getResultClassName(), declaration.isDefaultResultClass(), addComma);
-            writeParameter(fw, Constants.PARAM_CONFIGCLASS, declaration.getConfigurationClassName(), declaration.isDefaultConfigurationClass(), addComma);
-            fw.write(")\n");
+            addComma = writeParameter(fw, Constants.PARAM_CONFIGCLASS, declaration.getConfigurationClassName(), declaration.isDefaultConfigurationClass(), addComma);
+            writeParameter(fw, Constants.PARAM_DATABASE, declaration.getDatabase(), false, addComma);
+            fw.write(")" + LINE_SEPARATOR);
 
             // Write SQL statement
             fw.write(declaration.getStatementText());

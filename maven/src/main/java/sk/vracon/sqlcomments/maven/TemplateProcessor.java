@@ -25,11 +25,14 @@ import java.util.Map;
 
 import org.apache.maven.plugin.logging.Log;
 
+import sk.vracon.sqlcomments.core.Utils;
 import sk.vracon.sqlcomments.maven.generate.AbstractStatementContext;
 import sk.vracon.sqlcomments.maven.generate.PlaceholderInfo;
+import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import freemarker.template.TemplateModelException;
 
 public class TemplateProcessor {
 
@@ -49,31 +52,30 @@ public class TemplateProcessor {
 
     private static final String TEMPLATE_DOMAIN_CONFIGURATION = "template/DomainConfiguration.ftl";
 
-    private static final String TEMPLATE_DOMAIN_CLASS = "template/DomainClass.ftl";
-
     private Log log;
 
     private Configuration configuration = new Configuration(Configuration.VERSION_2_3_21);
 
-    public TemplateProcessor(Log log) {
+    public TemplateProcessor(Log log) throws TemplateModelException {
         this.log = log;
 
         configuration.setDefaultEncoding("UTF-8");
         configuration.setClassForTemplateLoading(TemplateProcessor.class, "/");
+        configuration.setSharedVariable("utils", new BeansWrapperBuilder(Configuration.getVersion()).build().getStaticModels().get(Utils.class.getName()));
     }
 
-    public void populateResultTemplate(File outputDirectory, String className, AbstractStatementContext selectContext, StatementDeclaration declaration)
-            throws IOException {
-        populateResultTemplate(TEMPLATE_RESULT_CLASS, outputDirectory, className, selectContext, declaration, false);
+    public void populateResultTemplate(File outputDirectory, String className, AbstractStatementContext selectContext, StatementDeclaration declaration,
+            Map<String, Object> extraTemplateModel) throws IOException {
+        populateResultTemplate(TEMPLATE_RESULT_CLASS, outputDirectory, className, selectContext, declaration, false, extraTemplateModel);
     }
 
-    public void populateResultMapperTemplate(File outputDirectory, String className, AbstractStatementContext selectContext, StatementDeclaration declaration)
-            throws IOException {
-        populateResultTemplate(TEMPLATE_RESULT_MAPPER, outputDirectory, className, selectContext, declaration, true);
+    public void populateResultMapperTemplate(File outputDirectory, String className, AbstractStatementContext selectContext, StatementDeclaration declaration,
+            Map<String, Object> extraTemplateModel) throws IOException {
+        populateResultTemplate(TEMPLATE_RESULT_MAPPER, outputDirectory, className, selectContext, declaration, true, extraTemplateModel);
     }
 
     private void populateResultTemplate(String templateName, File outputDirectory, String className, AbstractStatementContext selectContext,
-            StatementDeclaration declaration, boolean mapper) throws IOException {
+            StatementDeclaration declaration, boolean mapper, Map<String, Object> extraTemplateModel) throws IOException {
 
         // Build the data-model
         String packageName = null;
@@ -86,6 +88,7 @@ public class TemplateProcessor {
 
         Map<String, Object> data = createGenericData(packageName, simpleClassName, declaration);
         data.put("selectContext", selectContext);
+        data.putAll(extraTemplateModel);
 
         // Create file name and write file
         String fileName = packageName == null ? "" : (packageName.replace('.', File.separatorChar) + File.separator);
@@ -97,16 +100,16 @@ public class TemplateProcessor {
 
     public void populateGenericConfigurationTemplate(File outputDirectory, String className, StatementDeclaration declaration,
             List<PlaceholderInfo> placeholders) throws IOException {
-        populateConfigurationTemplate(outputDirectory, className, TEMPLATE_CONFIGURATION, declaration, placeholders);
+        populateConfigurationTemplate(outputDirectory, className, TEMPLATE_CONFIGURATION, declaration, placeholders, null);
     }
 
-    public void populateDomainConfigurationTemplate(File outputDirectory, String className, StatementDeclaration declaration, List<PlaceholderInfo> placeholders)
-            throws IOException {
-        populateConfigurationTemplate(outputDirectory, className, TEMPLATE_DOMAIN_CONFIGURATION, declaration, placeholders);
+    public void populateDomainConfigurationTemplate(File outputDirectory, String className, StatementDeclaration declaration,
+            List<PlaceholderInfo> placeholders, Map<String, Object> extraTemplateModel) throws IOException {
+        populateConfigurationTemplate(outputDirectory, className, TEMPLATE_DOMAIN_CONFIGURATION, declaration, placeholders, extraTemplateModel);
     }
 
     private void populateConfigurationTemplate(File outputDirectory, String className, String templateName, StatementDeclaration declaration,
-            List<PlaceholderInfo> placeholders) throws IOException {
+            List<PlaceholderInfo> placeholders, Map<String, Object> extraTemplateModel) throws IOException {
 
         // Build the data-model
         String packageName = null;
@@ -119,6 +122,9 @@ public class TemplateProcessor {
 
         Map<String, Object> data = createGenericData(packageName, simpleClassName, declaration);
         data.put("placeholders", placeholders);
+        if (extraTemplateModel != null) {
+            data.putAll(extraTemplateModel);
+        }
 
         // Create file name and write file
         String fileName = className.replace('.', File.separatorChar) + ".java";
@@ -132,10 +138,6 @@ public class TemplateProcessor {
         data.put("simpleClassName", simpleClassName);
         data.put("statementDeclaration", declaration);
         return data;
-    }
-
-    public void writeDomainClass(File outputDirectory, String fileName, Map<String, Object> data) throws IOException {
-        writeFile(outputDirectory, fileName, TEMPLATE_DOMAIN_CLASS, data);
     }
 
     public void writeInsert(File outputDirectory, String fileName, Map<String, Object> data) throws IOException {
@@ -167,6 +169,8 @@ public class TemplateProcessor {
         // Write template
         Writer writer = null;
         try {
+            data.put("templateUtils", new TemplateUtils());
+
             writer = new FileWriter(outputFile);
             template.process(data, writer);
             writer.flush();

@@ -17,6 +17,7 @@ package sk.vracon.sqlcomments.maven;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 
 import org.apache.maven.project.MavenProject;
 import org.junit.Test;
@@ -48,6 +49,15 @@ public class GenerateMojoTest extends AbstractMojoTest {
         mojo.execute();
 
         compareAllJavaFiles("SelectWithPlaceholder");
+    }
+
+    @Test
+    public void testMappedPlaceholder() throws Exception {
+        GenerateMojo mojo = createMojo("mappedPlaceholder.sql");
+
+        mojo.execute();
+
+        compareAllJavaFiles("MappedPlaceholder");
     }
 
     @Test
@@ -149,7 +159,35 @@ public class GenerateMojoTest extends AbstractMojoTest {
         compareJavaFiles("DefaultResult");
         compareJavaFiles("sqlcomments/DefaultResultMapper");
     }
+    
+    @Test
+    public void testDeleteWithInnerSelect() throws Exception {
+        GenerateMojo mojo = createMojo("deleteWithInnerSelect.sql");
 
+        mojo.execute();
+
+        compareJavaFiles("sqlcomments/DeleteWithInnerSelectConfig");
+    }
+    
+    @Test
+    public void testUpdateInSelect() throws Exception {
+        GenerateMojo mojo = createMojo("updateInSelect.sql");
+
+        mojo.execute();
+
+        compareJavaFiles("sqlcomments/UpdateInSelectConfig");
+    }
+    
+    @Test
+    public void testSelectWithCollectionAndMapper() throws Exception {
+        GenerateMojo mojo = createMojo("selectWithCollectionAndMapper.sql");
+
+        mojo.execute();
+
+        compareAllJavaFiles("SelectWithCollectionAndMapper");
+    }
+    
+    @SuppressWarnings("serial")
     private GenerateMojo createMojo(String sqlFile) {
         GenerateMojo mojo = new GenerateMojo();
 
@@ -161,6 +199,15 @@ public class GenerateMojoTest extends AbstractMojoTest {
         mojo.databaseUrl = DB_URL;
         mojo.dbUserName = DB_USERNAME;
         mojo.dbPassword = DB_PASSWORD;
+
+        mojo.tables = new HashMap<String, String>() {
+            {
+                put("Users", null);
+                put("Companies", "country" + AbstractSqlCommentsMojo.TABLE_PROP_COLUMN_JAVA_CLASS + "=sk.vracon.sqlcomments.maven.ExampleEnum\ncountry"
+                        + AbstractSqlCommentsMojo.TABLE_PROP_COLUMN_MAPPER + "=sk.vracon.sqlcomments.core.mappers.EnumMapper");
+                put("Documents", AbstractSqlCommentsMojo.TABLE_PROP_CLASS_NAME + "=Documents");
+            }
+        };
 
         return mojo;
     }

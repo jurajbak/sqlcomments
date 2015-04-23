@@ -16,7 +16,8 @@ create table users (
 	last_name VARCHAR(50),
 	email VARCHAR(50),
 	country VARCHAR(50),
-	companyId INT
+	companyId INT,
+	FOREIGN KEY (companyId) REFERENCES companies(id)
 );
 
 create table documents (
@@ -25,5 +26,5 @@ create table documents (
 	description VARCHAR(500),
 	userId INT,
 	data BLOB,
-	FOREIGN KEY (id) REFERENCES companies(id)
+	FOREIGN KEY (userId) REFERENCES users(id)
 );

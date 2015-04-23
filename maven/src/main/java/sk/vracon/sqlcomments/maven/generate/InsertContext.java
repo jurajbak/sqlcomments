@@ -20,9 +20,9 @@ import java.util.List;
 
 public class InsertContext extends AbstractStatementContext {
 
-    List<ColumnIdentifier> columnIdentifiers = new LinkedList<ColumnIdentifier>();
+    List<TableColumnIdentifier> columnIdentifiers = new LinkedList<TableColumnIdentifier>();
 
-    public List<ColumnIdentifier> getColumnIdentifiers() {
+    public List<TableColumnIdentifier> getColumnIdentifiers() {
         return columnIdentifiers;
     }
 

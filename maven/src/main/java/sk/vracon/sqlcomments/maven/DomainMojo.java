@@ -17,7 +17,6 @@ package sk.vracon.sqlcomments.maven;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringReader;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -38,29 +37,12 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.DefaultMavenProjectHelper;
 
+import sk.vracon.sqlcomments.core.DBColumnMetadata;
 import sk.vracon.sqlcomments.core.Utils;
-import sk.vracon.sqlcomments.maven.generate.DBColumnDefinition;
 import sk.vracon.sqlcomments.maven.generate.PlaceholderInfo;
 
 @Mojo(name = "domain", defaultPhase = LifecyclePhase.GENERATE_RESOURCES, requiresProject = true)
 public class DomainMojo extends AbstractSqlCommentsMojo {
-
-    /**
-     * A list of tables to include.
-     * 
-     * <p>
-     * Map consists of pairs &lt;table name&gt; - &lt;table properties&gt;. Properties are in form {@link Properties}.
-     * </p>
-     * <p>
-     * Currently supported properties:
-     * <ul>
-     * <li>pkGenerator - sequence call or other statement to use in generated insert statements instead of PK column</li>
-     * </ul>
-     * <p>
-     * 
-     */
-    @Parameter(required = false)
-    protected Map<String, String> tables;
 
     /**
      * A table prefix to be removed when creating domain class name.
@@ -79,7 +61,7 @@ public class DomainMojo extends AbstractSqlCommentsMojo {
      * 
      * Key is a table name.
      */
-    private Map<String, Set<DBColumnDefinition>> tableColumns;
+    private Map<String, Set<DBColumnMetadata>> tableColumns;
 
     /**
      * Database metadata. Informations about primary keys.
@@ -116,71 +98,121 @@ public class DomainMojo extends AbstractSqlCommentsMojo {
         getLog().info("Processing table: " + table);
 
         try {
-            String baseClassName;
-            if (tablePrefix != null && table.toLowerCase().startsWith(tablePrefix.toLowerCase())) {
-                baseClassName = Utils.transformToJavaIdentifier(table.substring(tablePrefix.length()), true);
-            } else {
-                baseClassName = Utils.transformToJavaIdentifier(table, true);
-            }
-            String resultClass = packageName + "." + baseClassName;
-            String configClass = packageName + ".sqlcomments." + baseClassName + "Config";
+            Properties processedTableProperties = tableProperties.get(table);
 
+            // Construct class names
+            String domainPackageName = packageName;
+            String domainSimpleClassName;
+            String domainClass = processedTableProperties.getProperty(TABLE_PROP_CLASS_NAME);
+            if (domainClass == null) {
+                // Domain class was not specified - generate from table name
+                if (tablePrefix != null && table.toLowerCase().startsWith(tablePrefix.toLowerCase())) {
+                    domainSimpleClassName = Utils.transformToJavaIdentifier(table.substring(tablePrefix.length()), true);
+                } else {
+                    domainSimpleClassName = Utils.transformToJavaIdentifier(table, true);
+                }
+
+                domainClass = domainPackageName + "." + domainSimpleClassName;
+            } else {
+                // Domain class was specified
+                // Get simple base class name
+                int classNameStart = domainClass.lastIndexOf('.');
+                if (classNameStart < 0) {
+                    classNameStart = 0;
+                }
+                domainSimpleClassName = domainClass.substring(classNameStart + 1);
+
+                domainPackageName = domainClass.substring(0, classNameStart);
+            }
+
+            String configClass = "sqlcomments." + domainSimpleClassName + "Config";
+            if (domainPackageName.length() > 0) {
+                configClass = domainPackageName + "." + configClass;
+            }
+
+            // Create statement declaration for class generator
             StatementDeclaration declaration = new StatementDeclaration();
-            declaration.setBaseClassName(resultClass);
-            declaration.setResultClassName(resultClass);
+            declaration.setBaseClassName(domainClass);
+            declaration.setResultClassName(domainClass);
             declaration.setConfigurationClassName(configClass);
-            declaration.setName(baseClassName);
+            declaration.setName(domainSimpleClassName);
 
             // Create placeholders from columns
-            List<DBColumnDefinition> columns = new ArrayList<DBColumnDefinition>(tableColumns.get(table));
+            List<DBColumnMetadata> columns = new ArrayList<DBColumnMetadata>(tableColumns.get(table));
             // Sort columns by name to avoid unnecessary changes in generated classes
-            Collections.sort(columns, new Comparator<DBColumnDefinition>() {
-                public int compare(DBColumnDefinition o1, DBColumnDefinition o2) {
+            Collections.sort(columns, new Comparator<DBColumnMetadata>() {
+                public int compare(DBColumnMetadata o1, DBColumnMetadata o2) {
                     return o1.getColumnName().compareTo(o2.getColumnName());
                 }
             });
 
             List<PlaceholderInfo> placeholders = new ArrayList<PlaceholderInfo>(columns.size());
-            for (DBColumnDefinition column : columns) {
+            for (DBColumnMetadata column : columns) {
                 PlaceholderInfo placeholder = new PlaceholderInfo();
                 placeholder.setName(Utils.transformToJavaIdentifier(column.getColumnName(), false));
                 placeholder.setJavaClass(dialect.getJavaTypeForSQL(column.getSqlType(), column.getSqlTypeName()));
 
+                Properties properties = tableProperties.get(table);
+                placeholder.setMappedClass(ColumnUtils.findColumnProperty(properties, column.getColumnName() + TABLE_PROP_COLUMN_JAVA_CLASS));
+                placeholder.setMapperClass(ColumnUtils.findColumnProperty(properties, column.getColumnName() + TABLE_PROP_COLUMN_MAPPER));
+
                 placeholders.add(placeholder);
             }
 
-            Properties tableProperties = new Properties();
-            String tablePropertiesString = tables.get(table);
-            if (tablePropertiesString != null) {
-                tableProperties.load(new StringReader(tablePropertiesString));
-            }
+            // Generate configuration class
+            Map<String, Object> configTemplateData = new HashMap<String, Object>();
+            configTemplateData.put("primaryKeys", tablePrimaryKeys.get(table));
+            configTemplateData.put("tableColumns", columns);
 
-            // Create template data
-            Map<String, Object> templateData = templateProcessor.createGenericData(packageName, baseClassName, declaration);
+            templateProcessor.populateDomainConfigurationTemplate(outputDirectory, declaration.getConfigurationClassName(), declaration, placeholders,
+                    configTemplateData);
+
+            // Generate SQL files
+            String fileName = domainClass.replace('.', File.separatorChar);
+
+            Map<String, Object> templateData = templateProcessor.createGenericData(domainPackageName, domainSimpleClassName, declaration);
+            templateData.put("primaryKeys", tablePrimaryKeys.get(table));
             templateData.put("table", table);
             templateData.put("columns", columns);
             templateData.put("placeholders", placeholders);
-            templateData.put("primaryKeys", tablePrimaryKeys.get(table));
-            templateData.put("tableProperties", tableProperties);
+            templateData.put("tableProperties", processedTableProperties);
 
-            String fileName = packageName.replace('.', File.separatorChar) + File.separatorChar + baseClassName;
-
-            // Generate configuration class
-            templateProcessor.populateDomainConfigurationTemplate(outputDirectory, declaration.getConfigurationClassName(), declaration, placeholders);
-
-            // Generate SQL files
+            // Write generic insert file
             templateProcessor.writeInsert(outputDirectory, fileName + ".insert.sql", templateData);
 
+            // Write insert files specific for database
+            for (Object key : processedTableProperties.keySet()) {
+                String propertyName = key.toString();
+                if (propertyName.startsWith(TABLE_PROP_PK_GENERATOR + ".")) {
+                    String database = propertyName.substring(TABLE_PROP_PK_GENERATOR.length() + 1).toLowerCase();
+
+                    Properties dbTableProperties = new Properties(processedTableProperties);
+                    dbTableProperties.setProperty(TABLE_PROP_PK_GENERATOR, processedTableProperties.getProperty(propertyName));
+
+                    Map<String, Object> dbTemplateData = new HashMap<String, Object>(templateData);
+                    dbTemplateData.put("tableProperties", dbTableProperties);
+
+                    templateProcessor.writeInsert(outputDirectory, fileName + ".insert." + database + ".sql", dbTemplateData);
+                }
+            }
+
+            // Write update file
             templateProcessor.writeUpdate(outputDirectory, fileName + ".update.sql", templateData);
 
+            // Write delete file
             templateProcessor.writeDelete(outputDirectory, fileName + ".delete.sql", templateData);
 
-            declaration.setConfigurationClassName(packageName + ".sqlcomments." + baseClassName + "PKConfig");
+            String pkConfigClass = "sqlcomments." + domainSimpleClassName + "PKConfig";
+            if (domainPackageName != null && domainPackageName.length() > 0) {
+                pkConfigClass = domainPackageName + "." + pkConfigClass;
+            }
+            declaration.setConfigurationClassName(pkConfigClass);
             String findByPKFileName = fileName + ".findByPK.sql";
             templateProcessor.writeFindByPK(outputDirectory, findByPKFileName, templateData);
 
             // Process created SQL to generate domain class, mapper and PK configuration
-            processFile(outputDirectory, findByPKFileName);
+            processedTableProperties.put("primaryKeys", tablePrimaryKeys.get(table));
+            processFile(outputDirectory, findByPKFileName, (Map) processedTableProperties);
 
         }
         catch (IOException e) {
@@ -195,7 +227,7 @@ public class DomainMojo extends AbstractSqlCommentsMojo {
 
         ResultSet tablesRS = databaseMetaData.getTables(null, null, null, null);
 
-        tableColumns = new HashMap<String, Set<DBColumnDefinition>>();
+        tableColumns = new HashMap<String, Set<DBColumnMetadata>>();
         tablePrimaryKeys = new HashMap<String, Set<String>>();
 
         while (tablesRS.next()) {
@@ -218,7 +250,7 @@ public class DomainMojo extends AbstractSqlCommentsMojo {
             // Read information about all columns
             ResultSet columnsRS = databaseMetaData.getColumns(null, null, table, null);
 
-            Set<DBColumnDefinition> columns = new HashSet<DBColumnDefinition>();
+            Set<DBColumnMetadata> columns = new HashSet<DBColumnMetadata>();
             while (columnsRS.next()) {
                 columns.add(mapDBColumnDefinition(columnsRS));
             }
@@ -228,7 +260,11 @@ public class DomainMojo extends AbstractSqlCommentsMojo {
             ResultSet primaryKeysRS = databaseMetaData.getPrimaryKeys(null, null, table);
             Set<String> keys = new HashSet<String>();
             while (primaryKeysRS.next()) {
-                keys.add(primaryKeysRS.getString("COLUMN_NAME"));
+                String pkTable = primaryKeysRS.getString("TABLE_NAME");
+                // Check table name again - some JDBC drivers (pgjdbc-ng) ignore filter in method getPrimaryKeys
+                if (pkTable.equalsIgnoreCase(table)) {
+                    keys.add(primaryKeysRS.getString("COLUMN_NAME"));
+                }
             }
             primaryKeysRS.close();
             tablePrimaryKeys.put(table, keys);

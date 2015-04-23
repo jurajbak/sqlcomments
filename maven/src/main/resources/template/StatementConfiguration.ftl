@@ -4,9 +4,16 @@ package ${packageName};
 
 <#assign classImports = []>
 <#list placeholders as placeholder>
-<#if !placeholder.javaClass.name?starts_with("java.lang.") && !classImports?seq_contains(placeholder.javaClass.name)>
-	<#assign classImports = classImports + [placeholder.javaClass.name]>
+<#if placeholder.mappedClass?has_content>
+	<#if !placeholder.mappedClass?starts_with("java.lang.") && !placeholder.mappedClass?contains("[") && !classImports?seq_contains(placeholder.mappedClass)>
+		<#assign classImports = classImports + [placeholder.mappedClass]>
+import ${placeholder.mappedClass};
+	</#if>
+<#else>
+	<#if !placeholder.javaClass.name?starts_with("java.lang.") && !placeholder.javaClass.name?contains("[") && !classImports?seq_contains(placeholder.javaClass.name)>
+		<#assign classImports = classImports + [placeholder.javaClass.name]>
 import ${placeholder.javaClass.name};
+	</#if>
 </#if>
 <#if placeholder.collection && !classImports?seq_contains('java.util.Collection')>
 	<#assign classImports = classImports + ['java.util.Collection']>
@@ -30,14 +37,47 @@ public class ${simpleClassName} implements StatementConfiguration {
 	private Map<String, Object> __sqlParameters;
 	
 	private Set<String> __acceptNullParameters;
+	
+	private Long limit;
+    private Long offset;
 
 <#list placeholders as placeholder>
-	public void set${placeholder.name[0]?upper_case}${placeholder.name[1..]}(<#if placeholder.collection>Collection<${placeholder.javaClass.simpleName}><#else>${placeholder.javaClass.simpleName}</#if> value) {
+	<#if placeholder.mapperClass?has_content>
+	private ${placeholder.mapperClass} ${placeholder.name}ColumnMapper = new ${placeholder.mapperClass}(); 
+	</#if> 
+</#list>
+
+	public ${simpleClassName}() {
+	<#list placeholders as placeholder>
+		<#if placeholder.mapperClass?has_content>
+		${placeholder.name}ColumnMapper.setJavaType(${templateUtils.getSimpleClassName(placeholder.mappedClass)! placeholder.javaClass.simpleName}.class); 
+		</#if> 
+	</#list>
+	}
+
+<#list placeholders as placeholder>
+	public void set${placeholder.name[0]?upper_case}${placeholder.name[1..]}(<#if placeholder.collection>Collection<${templateUtils.getSimpleClassName(placeholder.mappedClass)! placeholder.javaClass.simpleName}><#else>${templateUtils.getSimpleClassName(placeholder.mappedClass)! placeholder.javaClass.simpleName}</#if> value) {
 		if(__sqlParameters == null) {
 			__sqlParameters = new HashMap<String, Object>();
 		}
 		
+		<#if placeholder.mapperClass?has_content>
+			<#if placeholder.collection>
+		if(value == null) {
+			__sqlParameters.put("${placeholder.name}", ${placeholder.name}ColumnMapper.convertToDatabase(null));
+		} else {
+			Set converted = new HashSet(value.size()); 
+			for (${templateUtils.getSimpleClassName(placeholder.mappedClass)} item : value) {
+			    converted.add(${placeholder.name}ColumnMapper.convertToDatabase(item));
+	        }
+			__sqlParameters.put("${placeholder.name}", converted);
+		}
+			<#else>
+		__sqlParameters.put("${placeholder.name}", ${placeholder.name}ColumnMapper.convertToDatabase(value));
+			</#if>
+		<#else> 
 		__sqlParameters.put("${placeholder.name}", value);
+		</#if> 
 	}
 	
 </#list>
@@ -66,4 +106,20 @@ public class ${simpleClassName} implements StatementConfiguration {
 	public Set<String> generateParametersAcceptingNull() {
 		return __acceptNullParameters;
 	}
+
+    public Long limit() {
+        return limit;
+    }
+
+    public void limit(Long limit) {
+        this.limit = limit;
+    }
+
+    public Long offset() {
+        return offset;
+    }
+
+    public void offset(Long offset) {
+        this.offset = offset;
+    }
 }

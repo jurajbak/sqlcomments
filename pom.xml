@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>sk.vracon.sqlcomments</groupId>
 	<artifactId>sqlcomments</artifactId>
-	<version>0.0.2</version>
+	<version>0.0.3</version>
 	<packaging>pom</packaging>
 
 	<name>SQL Comments Parent POM</name>
@@ -79,9 +79,9 @@
 					<autoVersionSubmodules>true</autoVersionSubmodules>
 					<enableFeatureVersions>true</enableFeatureVersions>
 					<keepBranch>false</keepBranch>
-					<pushFeatures>true</pushFeatures>
-					<pushHotfixes>true</pushHotfixes>
-					<pushReleases>true</pushReleases>
+					<pushFeatures>false</pushFeatures>
+					<pushHotfixes>false</pushHotfixes>
+					<pushReleases>false</pushReleases>
 
 					<noDeploy>true</noDeploy>
 					<noFeatureBuild>true</noFeatureBuild>
@@ -196,6 +196,11 @@
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-context</artifactId>
+				<version>${dependency.version.spring}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-core</artifactId>
 				<version>${dependency.version.spring}</version>
 			</dependency>
 

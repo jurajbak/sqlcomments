@@ -25,8 +25,8 @@ import org.apache.maven.plugin.logging.Log;
 
 import sk.vracon.sqlcomments.core.Utils;
 import sk.vracon.sqlcomments.maven.generate.AbstractStatementContext;
-import sk.vracon.sqlcomments.maven.generate.ColumnIdentifier;
-import sk.vracon.sqlcomments.maven.generate.ColumnInfo;
+import sk.vracon.sqlcomments.maven.generate.TableColumnIdentifier;
+import sk.vracon.sqlcomments.maven.generate.ResultColumnInfo;
 import sk.vracon.sqlcomments.maven.generate.DeleteContext;
 import sk.vracon.sqlcomments.maven.generate.InsertContext;
 import sk.vracon.sqlcomments.maven.generate.PlaceholderInfo;
@@ -111,10 +111,10 @@ public class ColumnExtractorSQLQueryListener extends SQLParserBaseListener {
             SelectContext finishedContext = (SelectContext) contexts.pop();
             queryPart.pop();
 
-            SelectContext context = (SelectContext) contexts.peek();
+            AbstractStatementContext context = contexts.peek();
             if (queryPart.peek() == ProcessedPart.SELECT) {
                 // Set subquery to processed column
-                ColumnInfo column = context.getColumns().peek();
+                ResultColumnInfo column = ((SelectContext) context).getColumns().peek();
                 column.getSubqueries().add(finishedContext);
             } else if (queryPart.peek() == ProcessedPart.FROM) {
                 // Set subquery to processed table
@@ -167,7 +167,7 @@ public class ColumnExtractorSQLQueryListener extends SQLParserBaseListener {
     public void enterDerived_column(Derived_columnContext ctx) {
         // Called only from select
         // Register new column
-        ColumnInfo column = new ColumnInfo();
+        ResultColumnInfo column = new ResultColumnInfo();
 
         // Get column alias
         String alias = null;
@@ -197,21 +197,21 @@ public class ColumnExtractorSQLQueryListener extends SQLParserBaseListener {
         if (processedPart == ProcessedPart.SELECT) {
             // Collecting columns
             SelectContext context = (SelectContext) contexts.peek();
-            ColumnInfo column = context.getColumns().peek();
+            ResultColumnInfo column = context.getColumns().peek();
 
             ParseTree child = ctx.getChild(0);
 
             if (child instanceof Column_referenceContext) {
                 // Direct column reference
                 Column_referenceContext childCtx = (Column_referenceContext) child;
-                column.getReferences().add(new ColumnIdentifier(childCtx.tb_name == null ? null : childCtx.tb_name.getText(), childCtx.name.getText()));
+                column.getReferences().add(new TableColumnIdentifier(childCtx.tb_name == null ? null : childCtx.tb_name.getText(), childCtx.name.getText()));
             } else if (child instanceof Unsigned_value_specificationContext) {
                 // Constant - numeric or string
                 Unsigned_value_specificationContext childCtx = (Unsigned_value_specificationContext) child;
                 Unsigned_literalContext unsignedLiteral = childCtx.unsigned_literal();
                 if (unsignedLiteral.unsigned_numeric_literal() != null) {
                     // Numerical value
-                    ColumnIdentifier columnIdentifier = new ColumnIdentifier();
+                    TableColumnIdentifier columnIdentifier = new TableColumnIdentifier();
                     column.getReferences().add(columnIdentifier);
                     try {
                         Long.parseLong(unsignedLiteral.unsigned_numeric_literal().getText());
@@ -224,7 +224,7 @@ public class ColumnExtractorSQLQueryListener extends SQLParserBaseListener {
                     }
                 } else if (unsignedLiteral.general_literal() != null) {
                     // String value
-                    ColumnIdentifier columnIdentifier = new ColumnIdentifier();
+                    TableColumnIdentifier columnIdentifier = new TableColumnIdentifier();
                     columnIdentifier.setJavaType(String.class);
                     column.getReferences().add(columnIdentifier);
                 } else {
@@ -261,12 +261,12 @@ public class ColumnExtractorSQLQueryListener extends SQLParserBaseListener {
         // Asterix column definition - could be only in select part
         // This column will be later replaced with real columns
 
-        ColumnInfo column = new ColumnInfo();
+        ResultColumnInfo column = new ResultColumnInfo();
         column.setAsterix(true);
         SelectContext context = (SelectContext) contexts.peek();
         context.getColumns().push(column);
 
-        ColumnIdentifier columnIdentifier = new ColumnIdentifier();
+        TableColumnIdentifier columnIdentifier = new TableColumnIdentifier();
         if (ctx.tb_name != null) {
             // All column from specified table or subselect
             columnIdentifier.setTableAlias(ctx.tb_name.getText());
@@ -304,7 +304,7 @@ public class ColumnExtractorSQLQueryListener extends SQLParserBaseListener {
 
             if (ctx.identifier() != null) {
                 for (IdentifierContext identifier : ctx.identifier()) {
-                    insertContext.getColumnIdentifiers().add(new ColumnIdentifier(null, identifier.getText()));
+                    insertContext.getColumnIdentifiers().add(new TableColumnIdentifier(null, identifier.getText()));
                 }
             }
         }

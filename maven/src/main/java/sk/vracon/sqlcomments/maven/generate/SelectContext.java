@@ -19,9 +19,9 @@ import java.util.Stack;
 
 public class SelectContext extends AbstractStatementContext {
 
-    private Stack<ColumnInfo> columns = new Stack<ColumnInfo>();
+    private Stack<ResultColumnInfo> columns = new Stack<ResultColumnInfo>();
 
-    public Stack<ColumnInfo> getColumns() {
+    public Stack<ResultColumnInfo> getColumns() {
         return columns;
     }
 
