@@ -3,5 +3,5 @@
 -- Replacement parameter should have an java.lang.String type
 --
 -- @SQLComment(name="replacementParameter", configClass="sk.vracon.sqlcomments.maven.generate.sqlcomments.ReplacementParameterConfig")
-select comp.id, comp.name from companies comp
+select e.empno, e.ename from emp e
 order by ${replacementParam}

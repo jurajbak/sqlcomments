@@ -3,7 +3,7 @@
 -- Testing basic functionality.
 --
 -- @SQLComment(name="simpleUpdate", configClass="sk.vracon.sqlcomments.maven.generate.sqlcomments.SimpleUpdateConfig")
-UPDATE Companies 
-SET name = email,
-	country = :country
-WHERE id > 5
+UPDATE dept 
+SET dname = loc,
+	loc = :country
+WHERE deptno > 5

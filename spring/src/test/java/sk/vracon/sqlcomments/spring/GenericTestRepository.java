@@ -28,7 +28,7 @@ import sk.vracon.sqlcomments.core.StatementContainer;
 public class GenericTestRepository extends AbstractSQLCommentsRepository {
 
     @Autowired
-    public void setDataSource2(DataSource dataSource) {
+    public void setDataSourceByAutowire(DataSource dataSource) {
         super.setDataSource(dataSource);
     }
 

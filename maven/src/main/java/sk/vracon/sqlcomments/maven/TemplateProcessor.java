@@ -50,6 +50,8 @@ public class TemplateProcessor {
 
     private static final String TEMPLATE_FIND_BY_PK = "template/FindByPK.ftl";
 
+    private static final String TEMPLATE_SELECT_ALL = "template/SelectAll.ftl";
+
     private static final String TEMPLATE_DOMAIN_CONFIGURATION = "template/DomainConfiguration.ftl";
 
     private Log log;
@@ -154,6 +156,10 @@ public class TemplateProcessor {
 
     public void writeFindByPK(File outputDirectory, String fileName, Map<String, Object> data) throws IOException {
         writeFile(outputDirectory, fileName, TEMPLATE_FIND_BY_PK, data);
+    }
+
+    public void writeSelectAll(File outputDirectory, String fileName, Map<String, Object> data) throws IOException {
+        writeFile(outputDirectory, fileName, TEMPLATE_SELECT_ALL, data);
     }
 
     private void writeFile(File outputDirectory, String fileName, String templateName, Map<String, Object> data) throws IOException {

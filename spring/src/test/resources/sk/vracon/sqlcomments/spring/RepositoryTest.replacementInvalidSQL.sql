@@ -1,2 +1,2 @@
-select id, name from companies
+select deptno, dname from dept
 order by ${orderBy} ${orderDirection}

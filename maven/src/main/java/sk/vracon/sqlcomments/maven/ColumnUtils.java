@@ -6,11 +6,10 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
-import org.apache.maven.plugin.logging.Log;
-
 import sk.vracon.sqlcomments.core.DBColumnMetadata;
+import sk.vracon.sqlcomments.core.Type;
+import sk.vracon.sqlcomments.core.dialect.DatabaseDialect;
 import sk.vracon.sqlcomments.maven.generate.AbstractStatementContext;
-import sk.vracon.sqlcomments.maven.generate.PlaceholderInfo;
 import sk.vracon.sqlcomments.maven.generate.ResultColumnInfo;
 import sk.vracon.sqlcomments.maven.generate.SelectContext;
 import sk.vracon.sqlcomments.maven.generate.TableColumnIdentifier;
@@ -21,130 +20,6 @@ import sk.vracon.sqlcomments.maven.generate.TableInfo;
  * 
  */
 public class ColumnUtils {
-
-    /**
-     * Assigns mapper class and mapped class properties to column.
-     * 
-     * @param databaseColumns
-     *            database metadata
-     * @param tableProperties
-     *            parsed table configuration
-     * @param column
-     *            parsed column
-     * @param selectContext
-     *            select context
-     */
-    public static void fillMapperToPlaceholder(Log log, Map<String, DBColumnMetadata> databaseColumns, Map<String, Properties> tableProperties,
-            PlaceholderInfo placeholder, Set<TableColumnIdentifier> identifiers) {
-
-        if (identifiers.size() == 0) {
-            throw new IllegalStateException("No identifiers for placeholder " + placeholder.getName());
-        }
-
-        Set<DBColumnMetadata> metadata = new HashSet<DBColumnMetadata>();
-        for (TableColumnIdentifier identifier : identifiers) {
-            Set<DBColumnMetadata> identifierMetadata = findDBColumnMetadataForColumnIdentifier(databaseColumns, placeholder.getContext(), identifier);
-            metadata.addAll(identifierMetadata);
-        }
-
-        String mappedClass = null;
-        String mapperClass = null;
-
-        boolean atLeastOneAssigned = false;
-        for (DBColumnMetadata columnMetadata : metadata) {
-            Properties properties = tableProperties.get(columnMetadata.getTableName());
-
-            if (atLeastOneAssigned) {
-                // Second and other entries
-                String nextMappedClass = findColumnProperty(properties, columnMetadata.getColumnName() + AbstractSqlCommentsMojo.TABLE_PROP_COLUMN_JAVA_CLASS);
-                String nextMapperClass = findColumnProperty(properties, columnMetadata.getColumnName() + AbstractSqlCommentsMojo.TABLE_PROP_COLUMN_MAPPER);
-
-                if ((mappedClass == null && nextMappedClass != null) || (mappedClass != null && !mappedClass.equals(nextMappedClass))) {
-                    // Configurations are not the same for all identifiers in column
-                    log.warn("Various java class defined for placeholder " + placeholder.getName() + " - found " + mappedClass + " and " + nextMappedClass
-                            + " Using first one.");
-                    break;
-                }
-                if ((mapperClass == null && nextMapperClass != null) || (mapperClass != null && !mapperClass.equals(nextMapperClass))) {
-                    // Configurations are not the same for all identifiers in column
-                    log.warn("Various mapper class defined for placeholder " + placeholder.getName() + " - found " + mapperClass + " and " + nextMapperClass
-                            + " Using first one.");
-                    break;
-                }
-            } else {
-                // First entry
-                mappedClass = findColumnProperty(properties, columnMetadata.getColumnName() + AbstractSqlCommentsMojo.TABLE_PROP_COLUMN_JAVA_CLASS);
-                mapperClass = findColumnProperty(properties, columnMetadata.getColumnName() + AbstractSqlCommentsMojo.TABLE_PROP_COLUMN_MAPPER);
-
-                atLeastOneAssigned = true;
-            }
-        }
-
-        placeholder.setMappedClass(mappedClass);
-        placeholder.setMapperClass(mapperClass);
-    }
-
-    /**
-     * Assigns mapper class and mapped class properties to column.
-     * 
-     * @param databaseColumns
-     *            database metadata
-     * @param tableProperties
-     *            parsed table configuration
-     * @param column
-     *            parsed column
-     * @param selectContext
-     *            select context
-     */
-    public static void fillMapperToColumn(Log log, Map<String, DBColumnMetadata> databaseColumns, Map<String, Properties> tableProperties,
-            ResultColumnInfo column, AbstractStatementContext selectContext) {
-
-        if (column.getReferences().size() == 0) {
-            throw new IllegalStateException("No identifiers for column " + column.getColumnName());
-        }
-
-        Set<DBColumnMetadata> metadata = new HashSet<DBColumnMetadata>();
-        for (TableColumnIdentifier identifier : column.getReferences()) {
-            Set<DBColumnMetadata> identifierMetadata = findDBColumnMetadataForColumnIdentifier(databaseColumns, selectContext, identifier);
-            metadata.addAll(identifierMetadata);
-        }
-
-        String mappedClass = null;
-        String mapperClass = null;
-
-        boolean atLeastOneAssigned = false;
-        for (DBColumnMetadata columnMetadata : metadata) {
-            Properties properties = tableProperties.get(columnMetadata.getTableName());
-
-            if (atLeastOneAssigned) {
-                // Second and other entries
-                String nextMappedClass = findColumnProperty(properties, columnMetadata.getColumnName() + AbstractSqlCommentsMojo.TABLE_PROP_COLUMN_JAVA_CLASS);
-                String nextMapperClass = findColumnProperty(properties, columnMetadata.getColumnName() + AbstractSqlCommentsMojo.TABLE_PROP_COLUMN_MAPPER);
-
-                if ((mappedClass == null && nextMappedClass != null) || (mappedClass != null && !mappedClass.equals(nextMappedClass))) {
-                    // Configurations are not the same for all identifiers in column
-                    log.warn("Various java class defined for column " + column.getColumnName() + " - found " + mappedClass + " and " + nextMappedClass
-                            + " Using first one.");
-                    break;
-                }
-                if ((mapperClass == null && nextMapperClass != null) || (mapperClass != null && !mapperClass.equals(nextMapperClass))) {
-                    // Configurations are not the same for all identifiers in column
-                    log.warn("Various mapper class defined for column " + column.getColumnName() + " - found " + mapperClass + " and " + nextMapperClass
-                            + " Using first one.");
-                    break;
-                }
-            } else {
-                // First entry
-                mappedClass = findColumnProperty(properties, columnMetadata.getColumnName() + AbstractSqlCommentsMojo.TABLE_PROP_COLUMN_JAVA_CLASS);
-                mapperClass = findColumnProperty(properties, columnMetadata.getColumnName() + AbstractSqlCommentsMojo.TABLE_PROP_COLUMN_MAPPER);
-
-                atLeastOneAssigned = true;
-            }
-        }
-
-        column.setMappedClass(mappedClass);
-        column.setMapperClass(mapperClass);
-    }
 
     /**
      * Case insensitive property search.
@@ -176,21 +51,21 @@ public class ColumnUtils {
      * 
      * @param databaseColumns
      *            database metadata
-     * @param selectContext
-     *            select context
+     * @param statementContext
+     *            statement context
      * @param identifier
      *            identifier
-     * @return
+     * @return column metadata
      */
     public static Set<DBColumnMetadata> findDBColumnMetadataForColumnIdentifier(Map<String, DBColumnMetadata> databaseColumns,
-            AbstractStatementContext selectContext, TableColumnIdentifier identifier) {
+            AbstractStatementContext statementContext, TableColumnIdentifier identifier) {
         Set<DBColumnMetadata> result = new HashSet<DBColumnMetadata>();
 
         if (identifier.getTableAlias() == null) {
             // There's no table alias on identifier - try to find table with such column
 
             DBColumnMetadata dbColumn = null;
-            for (TableInfo table : selectContext.getTables()) {
+            for (TableInfo table : statementContext.getTables()) {
                 String columnFullName = table.getName().toLowerCase() + "." + identifier.getColumnName().toLowerCase();
                 dbColumn = databaseColumns.get(columnFullName);
                 if (dbColumn != null) {
@@ -208,7 +83,7 @@ public class ColumnUtils {
             return result;
         } else {
             // Find appropriate table from database metadata
-            for (TableInfo table : selectContext.getTables()) {
+            for (TableInfo table : statementContext.getTables()) {
                 if (identifier.getTableAlias().equalsIgnoreCase(table.getAlias())) {
                     if (table.getSubqueries().size() == 0) {
                         // Direct table definition
@@ -258,23 +133,23 @@ public class ColumnUtils {
      *            column
      * @return java class
      */
-    public static Class<?> findJavaClassForColumn(DatabaseDialect dialect, Map<String, DBColumnMetadata> databaseColumns,
+    public static Type<?> findTypeForColumn(DatabaseDialect dialect, Map<String, DBColumnMetadata> databaseColumns,
             AbstractStatementContext selectContext, ResultColumnInfo column) {
-        Set<Class<?>> classes = new HashSet<Class<?>>();
+        Set<Type<?>> types = new HashSet<Type<?>>();
 
         // Find classes for all references in column
         for (TableColumnIdentifier identifier : column.getReferences()) {
-            Class<?> javaClass = findJavaClassForColumnIdentifier(dialect, databaseColumns, selectContext, identifier);
+            Type<?> type = findTypeForColumnIdentifier(dialect, databaseColumns, selectContext, identifier);
 
-            if (javaClass == null) {
+            if (type == null) {
                 throw new SyntaxErrorException("No java type found for column identifier" + identifier);
             }
 
-            classes.add(javaClass);
+            types.add(type);
         }
 
         // Get most generic class
-        return dialect.getMostGenericClass(classes);
+        return dialect.getMostGenericType(types);
     }
 
     /**
@@ -290,27 +165,27 @@ public class ColumnUtils {
      *            column identifier
      * @return java class
      */
-    public static Class<?> findJavaClassForColumnIdentifier(DatabaseDialect dialect, Map<String, DBColumnMetadata> databaseColumns,
+    public static Type<?> findTypeForColumnIdentifier(DatabaseDialect dialect, Map<String, DBColumnMetadata> databaseColumns,
             AbstractStatementContext selectContext, TableColumnIdentifier identifier) {
         // Check if identifier has class set
-        if (identifier.getJavaType() != null) {
-            return identifier.getJavaType();
+        if (identifier.getType() != null) {
+            return identifier.getType();
         }
 
         Set<DBColumnMetadata> dbColumns = ColumnUtils.findDBColumnMetadataForColumnIdentifier(databaseColumns, selectContext, identifier);
 
-        Set<Class<?>> classes = new HashSet<Class<?>>();
+        Set<Type<?>> types = new HashSet<Type<?>>();
         for (DBColumnMetadata dbColumn : dbColumns) {
-            Class<?> javaType = dialect.getJavaTypeForSQL(dbColumn.getSqlType(), dbColumn.getSqlTypeName());
-            if (javaType == null) {
-                throw new SyntaxErrorException("No java type found for SQL type " + dbColumn.getSqlTypeName() + " Referenced by column "
-                        + dbColumn.getTableName() + "." + dbColumn.getColumnName());
+            Type<?> type = dialect.getType(dbColumn);
+            if (type == null) {
+				throw new SyntaxErrorException("No java type defined for SQL type " + dbColumn.getSqlTypeName() + " sql type ID " + dbColumn.getSqlType() + " Referenced by column "
+						+ dbColumn.getTableName() + "." + dbColumn.getColumnName());
             }
 
-            classes.add(javaType);
+            types.add(type);
         }
 
         // Get most generic class
-        return dialect.getMostGenericClass(classes);
+        return dialect.getMostGenericType(types);
     }
 }

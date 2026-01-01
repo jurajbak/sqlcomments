@@ -24,13 +24,17 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.maven.plugin.logging.Log;
 
 import sk.vracon.sqlcomments.core.Utils;
+import sk.vracon.sqlcomments.core.types.DoubleType;
+import sk.vracon.sqlcomments.core.types.LongType;
+import sk.vracon.sqlcomments.core.types.ObjectOrUndefinedType;
+import sk.vracon.sqlcomments.core.types.StringType;
 import sk.vracon.sqlcomments.maven.generate.AbstractStatementContext;
-import sk.vracon.sqlcomments.maven.generate.TableColumnIdentifier;
-import sk.vracon.sqlcomments.maven.generate.ResultColumnInfo;
 import sk.vracon.sqlcomments.maven.generate.DeleteContext;
 import sk.vracon.sqlcomments.maven.generate.InsertContext;
 import sk.vracon.sqlcomments.maven.generate.PlaceholderInfo;
+import sk.vracon.sqlcomments.maven.generate.ResultColumnInfo;
 import sk.vracon.sqlcomments.maven.generate.SelectContext;
+import sk.vracon.sqlcomments.maven.generate.TableColumnIdentifier;
 import sk.vracon.sqlcomments.maven.generate.TableInfo;
 import sk.vracon.sqlcomments.maven.generate.UpdateContext;
 import sk.vracon.sqlcomments.maven.sql.SQLParser.Case_expressionContext;
@@ -59,6 +63,9 @@ import sk.vracon.sqlcomments.maven.sql.SQLParser.Variable_placeholderContext;
 import sk.vracon.sqlcomments.maven.sql.SQLParser.Where_clauseContext;
 import sk.vracon.sqlcomments.maven.sql.SQLParserBaseListener;
 
+/**
+ * ANTLR4 listener class for parsing SQL statements.
+ */
 public class ColumnExtractorSQLQueryListener extends SQLParserBaseListener {
 
     private static final Pattern COLUMN_DIRECT_PATTERN = Pattern.compile("[a-zA-Z_][a-zA-Z0-9_]*\\.[a-zA-Z_][a-zA-Z0-9_]*");
@@ -69,6 +76,11 @@ public class ColumnExtractorSQLQueryListener extends SQLParserBaseListener {
     private Stack<ProcessedPart> queryPart = new Stack<ProcessedPart>();
     private List<PlaceholderInfo> placeholders = new LinkedList<PlaceholderInfo>();
 
+    /**
+     * Default constructor.
+     * 
+     * @param log log instance
+     */
     public ColumnExtractorSQLQueryListener(Log log) {
         this.log = log;
     }
@@ -216,16 +228,16 @@ public class ColumnExtractorSQLQueryListener extends SQLParserBaseListener {
                     try {
                         Long.parseLong(unsignedLiteral.unsigned_numeric_literal().getText());
                         // Number is not decimal
-                        columnIdentifier.setJavaType(Long.class);
+                        columnIdentifier.setType(LongType.getInstance());
                     }
                     catch (NumberFormatException e) {
                         // Number is decimal
-                        columnIdentifier.setJavaType(Double.class);
+                        columnIdentifier.setType(DoubleType.getInstance());
                     }
                 } else if (unsignedLiteral.general_literal() != null) {
                     // String value
                     TableColumnIdentifier columnIdentifier = new TableColumnIdentifier();
-                    columnIdentifier.setJavaType(String.class);
+                    columnIdentifier.setType(StringType.getInstance());
                     column.getReferences().add(columnIdentifier);
                 } else {
                     log.warn("Unrecognized type at line " + unsignedLiteral.getStart().getLine() + ":" + unsignedLiteral.getStart().getCharPositionInLine()
@@ -234,7 +246,7 @@ public class ColumnExtractorSQLQueryListener extends SQLParserBaseListener {
             } else if (child instanceof Routine_invocationContext) {
                 // Routine (procedure) call
                 // We don't know return type of procedure
-                column.setJavaClass(Object.class);
+                column.setType(ObjectOrUndefinedType.getInstance());
             } else if (child instanceof Scalar_subqueryContext) {
                 // Subquery
                 // TODO maybe not needed - column reference and value
@@ -257,6 +269,7 @@ public class ColumnExtractorSQLQueryListener extends SQLParserBaseListener {
         }
     }
 
+    @Override
     public void enterQualified_asterisk(Qualified_asteriskContext ctx) {
         // Asterix column definition - could be only in select part
         // This column will be later replaced with real columns
@@ -289,7 +302,7 @@ public class ColumnExtractorSQLQueryListener extends SQLParserBaseListener {
         }
         if (ctx.getParent() instanceof Pattern_matching_predicateContext) {
             // Placeholder is used inside pattern clause (LIKE, REGEXP, ...) - it must be String
-            placeholder.setJavaClass(String.class);
+            placeholder.setType(StringType.getInstance());
         }
 
         placeholders.add(placeholder);
@@ -309,11 +322,21 @@ public class ColumnExtractorSQLQueryListener extends SQLParserBaseListener {
             }
         }
     }
-
+    
+    /**
+     * Returns a list of {@link PlaceholderInfo} created during parsing SQL statement.
+     * 
+     * @return list of {@link PlaceholderInfo}
+     */
     public List<PlaceholderInfo> getPlaceholders() {
         return placeholders;
     }
 
+    /**
+     * Returns current statement context.
+     * 
+     * @return current statement context.
+     */
     public AbstractStatementContext getPrimaryContext() {
         if (contexts.size() > 0) {
             return contexts.get(0);

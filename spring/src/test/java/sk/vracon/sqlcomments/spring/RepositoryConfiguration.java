@@ -32,7 +32,7 @@ public class RepositoryConfiguration {
         EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
         builder.setType(EmbeddedDatabaseType.HSQL);
         builder.setScriptEncoding("UTF-8");
-        builder.addDefaultScripts();
+        builder.addScript("/employees-test-database/scripts/Employees - HSQLDB.sql");
         return builder.build();
     }
 

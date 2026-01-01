@@ -22,6 +22,8 @@ import java.util.HashMap;
 import org.apache.maven.project.MavenProject;
 import org.junit.Test;
 
+import sk.vracon.sqlcomments.core.types.EnumType;
+
 public class GenerateMojoTest extends AbstractMojoTest {
 
     private static final String JDBC_DRIVER = "org.hsqldb.jdbcDriver";
@@ -186,6 +188,15 @@ public class GenerateMojoTest extends AbstractMojoTest {
 
         compareAllJavaFiles("SelectWithCollectionAndMapper");
     }
+
+    @Test
+    public void testUpdateVariousDataTypes() throws Exception {
+        GenerateMojo mojo = createMojo("updateVariousDatatypes.sql");
+
+        mojo.execute();
+
+        compareJavaFiles("sqlcomments/UpdateVariousDatatypesConfig");
+    }
     
     @SuppressWarnings("serial")
     private GenerateMojo createMojo(String sqlFile) {
@@ -203,8 +214,7 @@ public class GenerateMojoTest extends AbstractMojoTest {
         mojo.tables = new HashMap<String, String>() {
             {
                 put("Users", null);
-                put("Companies", "country" + AbstractSqlCommentsMojo.TABLE_PROP_COLUMN_JAVA_CLASS + "=sk.vracon.sqlcomments.maven.ExampleEnum\ncountry"
-                        + AbstractSqlCommentsMojo.TABLE_PROP_COLUMN_MAPPER + "=sk.vracon.sqlcomments.core.mappers.EnumMapper");
+				put("Companies", "country" + AbstractSqlCommentsMojo.TABLE_PROP_COLUMN_TYPE + "=" + EnumType.class.getName() + "(" + DepartmenTypesEnum.class.getName() + ")");
                 put("Documents", AbstractSqlCommentsMojo.TABLE_PROP_CLASS_NAME + "=Documents");
             }
         };

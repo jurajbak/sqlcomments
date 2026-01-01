@@ -4,126 +4,136 @@ package ${packageName};
 
 <#assign classImports = []>
 <#list placeholders as placeholder>
-<#if placeholder.mappedClass?has_content>
-	<#if !placeholder.mappedClass?starts_with("java.lang.") && !placeholder.mappedClass?contains("[") && !classImports?seq_contains(placeholder.mappedClass)>
-		<#assign classImports = classImports + [placeholder.mappedClass]>
-import ${placeholder.mappedClass};
-	</#if>
-<#else>
-	<#if !placeholder.javaClass.name?starts_with("java.lang.") && !placeholder.javaClass.name?contains("[") && !classImports?seq_contains(placeholder.javaClass.name)>
-		<#assign classImports = classImports + [placeholder.javaClass.name]>
-import ${placeholder.javaClass.name};
-	</#if>
-</#if>
+    <#if !placeholder.type.javaClass.name?starts_with("java.lang.") && !placeholder.type.javaClass.name?contains("[") && !classImports?seq_contains(placeholder.type.javaClass.name)>
+        <#assign classImports = classImports + [placeholder.type.javaClass.name]>
+import ${placeholder.type.javaClass.name};
+    </#if>
+    <#assign typeClassName = templateUtils.getTypeClass(placeholder).name>
+	<#if !typeClassName?starts_with("java.lang.") && !typeClassName?contains("[") && !classImports?seq_contains(typeClassName)>
+		<#assign classImports = classImports + [typeClassName]>
+import ${typeClassName};
+    </#if>
 <#if placeholder.collection && !classImports?seq_contains('java.util.Collection')>
-	<#assign classImports = classImports + ['java.util.Collection']>
+    <#assign classImports = classImports + ['java.util.Collection']>
 import java.util.Collection;
 </#if>
 </#list>
 
-<#if tableColumns?has_content>
-import sk.vracon.sqlcomments.core.DBColumnMetadata;
-</#if>
+import sk.vracon.sqlcomments.core.CRUDType;
 <#if placeholders?has_content>
 import java.util.HashMap;
-import java.util.HashSet;
 </#if>
 import java.util.Map;
 import java.util.Set;
 
 import sk.vracon.sqlcomments.core.StatementConfiguration;
+import sk.vracon.sqlcomments.core.Type;
 
+/**
+ * SQLComments configuration class for CRUD operations over table <#if tableColumns?has_content>${tableColumns[0].tableName}</#if>.
+ */
 public class ${simpleClassName} implements StatementConfiguration {
 
-	private static final Class<?> BASE_CLASS = <#if statementDeclaration.baseClassName?has_content>${statementDeclaration.baseClassName}.class<#else>null</#if>;
-	
-<#if tableColumns?has_content>
-	<#list tableColumns as column>
-	public static final DBColumnMetadata COLUMN_${utils.transformToJavaIdentifier(column.columnName, false)?upper_case} = new DBColumnMetadata("${column.tableName}", "${column.columnName}", ${column.sqlType?string["#"]}, "${column.sqlTypeName}", ${column.columnSize?string["#"]}, ${column.decimalDigits?string["#"]}, ${column.nullable?string});
-	
-	</#list>
-</#if>
-	public static final String[] PRIMARY_KEY = new String[] {<#list primaryKeys as key>"${key}"<#if key_has_next>, </#if></#list>};	
+    private static final Set<String> __primaryKey = Set.of(<#list primaryKeys as key>"${key}"<#sep>, </#list>);    
 
-	private Map<String, Object> __sqlParameters;
-	
-	private Set<String> __acceptNullParameters;
-	
-	private Long limit;
+    private static final Set<String> __acceptNullParameters = Set.of(<#list placeholders as placeholder>"${placeholder.name}"<#sep>, </#list>);
+    
+    private static final Map<String, Type<?>> __parameterTypes = Map.ofEntries(<#list placeholders as placeholder>
+                Map.entry("${placeholder.name}", ${templateUtils.getTypeClass(placeholder).simpleName}.getInstance(${templateUtils.getTypeInitParamsString(placeholder.type)}))<#sep>,</#list>);
+    
+    private Map<String, Object> __sqlParameters = new HashMap<String, Object>();
+    
+    private Long limit;
     private Long offset;
 
-	private String statementName;
+    private final String statementName;
+
+    /**
+     * Creates new instance of SQLComments configuration class for statement ${statementDeclaration.name}.
+     *
+     * @param operation CRUD operation name
+     */
+    public ${simpleClassName}(CRUDType operation) {
+        if (operation == null) {
+            throw new IllegalArgumentException("Attribute operation must be set.");
+        }
+    
+        statementName = operation.name().toLowerCase();
+    }
+
+    /**
+     * Creates new instance of SQLComments configuration class for statement ${statementDeclaration.name}.
+     *
+     * @param operation CRUD operation name
+     * @param domain domain instance from which will be filled statement configuration
+     */
+    public ${simpleClassName}(CRUDType operation, ${statementDeclaration.baseClassName} domain) {
+        this(operation);
+
+        if (domain == null) {
+            throw new IllegalArgumentException("Attribute domain must be set.");
+        }
+        
+        <#list placeholders as placeholder>
+        __sqlParameters.put("${placeholder.name}", domain.get${placeholder.name[0]?upper_case}${placeholder.name[1..]}());
+        </#list>
+    }
 
 <#list placeholders as placeholder>
-	<#if placeholder.mapperClass?has_content>
-	private ${placeholder.mapperClass} ${placeholder.name}ColumnMapper = new ${placeholder.mapperClass}(); 
-	</#if> 
+    /**
+     * Setter for placeholder ${placeholder.name}.
+     <#if placeholder.dbColumns?has_content>
+     <#list placeholder.dbColumns>
+     * <p>
+     * Placeholder is mapped to <#items as dbColumn>${dbColumn.tableName!}.${dbColumn.columnName}<#sep>, </#sep></#items>.
+     </#list>
+     </#if>
+     */
+    public void set${placeholder.name[0]?upper_case}${placeholder.name[1..]}(<#if placeholder.collection>Collection<${templateUtils.getSimpleClassName(placeholder.mappedClass)! placeholder.javaClass.simpleName}><#else>${templateUtils.getSimpleClassName(placeholder.mappedClass)! placeholder.javaClass.simpleName}</#if> value) {
+        __sqlParameters.put("${placeholder.name}", value);
+    }
+
+    /**
+     * Setter for placeholder ${placeholder.name}.
+     <#if placeholder.dbColumns?has_content>
+     <#list placeholder.dbColumns>
+     * <p>
+     * Placeholder is mapped to <#items as dbColumn>${dbColumn.tableName!}.${dbColumn.columnName}<#sep>, </#sep></#items>.
+     </#list>
+     </#if>
+     */
+    public ${simpleClassName} with${placeholder.name[0]?upper_case}${placeholder.name[1..]}(<#if placeholder.collection>Collection<${templateUtils.getSimpleClassName(placeholder.mappedClass)! placeholder.javaClass.simpleName}><#else>${templateUtils.getSimpleClassName(placeholder.mappedClass)! placeholder.javaClass.simpleName}</#if> value) {
+        set${placeholder.name[0]?upper_case}${placeholder.name[1..]}(value);
+        
+        return this;
+    }
+    
 </#list>
-	
-	public ${simpleClassName}(String operationName) {
-		statementName = operationName;
+    public String statementName() {
+        return statementName;
+    }
+    
+    public Class<?> baseClass() {
+        return <#if statementDeclaration.baseClassName?has_content>${statementDeclaration.baseClassName}.class<#else>null</#if>;
+    }
 
-	<#list placeholders as placeholder>
-		<#if placeholder.mapperClass?has_content>
-		${placeholder.name}ColumnMapper.setJavaType(${templateUtils.getSimpleClassName(placeholder.mappedClass)! placeholder.javaClass.simpleName}.class); 
-		</#if> 
-	</#list>
-	}
-
-	public ${simpleClassName}(String operationName, ${statementDeclaration.baseClassName} domain) {
-		this(operationName);
-		
-		__sqlParameters = new HashMap<String, Object>();
-		<#list placeholders as placeholder>
-		<#if placeholder.mapperClass?has_content>
-		__sqlParameters.put("${placeholder.name}", ${placeholder.name}ColumnMapper.convertToDatabase(domain.get${placeholder.name[0]?upper_case}${placeholder.name[1..]}()));
-		<#else> 
-		__sqlParameters.put("${placeholder.name}", domain.get${placeholder.name[0]?upper_case}${placeholder.name[1..]}());
-		</#if> 
-		</#list>
-	}
-
-<#list placeholders as placeholder>
-	public void set${placeholder.name[0]?upper_case}${placeholder.name[1..]}(<#if placeholder.collection>Collection<${templateUtils.getSimpleClassName(placeholder.mappedClass)! placeholder.javaClass.simpleName}><#else>${templateUtils.getSimpleClassName(placeholder.mappedClass)! placeholder.javaClass.simpleName}</#if> value) {
-		if(__sqlParameters == null) {
-			__sqlParameters = new HashMap<String, Object>();
-		}
-		
-		<#if placeholder.mapperClass?has_content>
-		__sqlParameters.put("${placeholder.name}", ${placeholder.name}ColumnMapper.convertToDatabase(value));
-		<#else> 
-		__sqlParameters.put("${placeholder.name}", value);
-		</#if> 
-	}
-	
-</#list>
-<#list placeholders as placeholder>
-	public void acceptNullIn${placeholder.name[0]?upper_case}${placeholder.name[1..]}() {
-		if(__acceptNullParameters == null) {
-			__acceptNullParameters = new HashSet<String>();
-		}
-		
-		__acceptNullParameters.add("${placeholder.name}");
-	}
-	
-</#list>
-	public String statementName() {
-		return statementName;
-	}
-	
-	public Class<?> baseClass() {
-		return BASE_CLASS;
-	}
-
-	public Map<String, Object> generateParameterMap() {
-		return __sqlParameters;
-	}
-	
-	public Set<String> generateParametersAcceptingNull() {
-		return __acceptNullParameters;
-	}
-	
-	public Long limit() {
+    public Map<String, Object> parameterMap() {
+        return __sqlParameters;
+    }
+    
+    public Map<String, Type<?>> typeMap() {
+        return __parameterTypes;
+    }
+    
+    public Set<String> parametersAcceptingNull() {
+        return __acceptNullParameters;
+    }
+    
+    public Set<String> primaryKey() {
+    	return __primaryKey;
+    }
+    
+    public Long limit() {
         return limit;
     }
 
@@ -137,5 +147,29 @@ public class ${simpleClassName} implements StatementConfiguration {
 
     public void offset(Long offset) {
         this.offset = offset;
+    }
+    
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("${simpleClassName} [statementName=");
+        builder.append(statementName());
+        builder.append(", baseClass=");
+        builder.append(baseClass());
+        builder.append(", sqlParameters=");
+        builder.append(parameterMap());
+        builder.append(", acceptNullParameters=");
+        builder.append(parametersAcceptingNull());
+        builder.append(", limit=");
+        builder.append(limit());
+        builder.append(", offset=");
+        builder.append(offset());
+        builder.append("]");
+        return builder.toString();
     }
 }

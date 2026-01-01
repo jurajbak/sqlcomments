@@ -1443,7 +1443,7 @@ fragment RegularExpressionFlags
 ///     RegularExpressionBackslashSequence
 ///     RegularExpressionClass
 fragment RegularExpressionFirstChar
- : ~[\r\n\u2028\u2029*\\/\[]
+ : ~[\r\n\u2028\u2029*\\/[]
  | RegularExpressionBackslashSequence
  | RegularExpressionClass
  ;
@@ -1453,7 +1453,7 @@ fragment RegularExpressionFirstChar
 ///     RegularExpressionBackslashSequence
 ///     RegularExpressionClass
 fragment RegularExpressionChar
- : ~[\r\n\u2028\u2029\\/\[]
+ : ~[\r\n\u2028\u2029\\/[]
  | RegularExpressionBackslashSequence
  | RegularExpressionClass
  ;

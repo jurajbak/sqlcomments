@@ -15,6 +15,8 @@
  */
 package sk.vracon.sqlcomments.maven.generate;
 
+import sk.vracon.sqlcomments.core.Type;
+
 /**
  * Represents table column identifier in statement.
  */
@@ -22,7 +24,7 @@ public class TableColumnIdentifier {
 
     private String tableAlias;
     private String columnName;
-    private Class<?> javaType;
+    private Type<?> type;
 
     public TableColumnIdentifier() {
     }
@@ -49,12 +51,12 @@ public class TableColumnIdentifier {
         this.columnName = columnName;
     }
 
-    public Class<?> getJavaType() {
-        return javaType;
+    public Type<?> getType() {
+        return type;
     }
 
-    public void setJavaType(Class<?> javaType) {
-        this.javaType = javaType;
+    public void setType(Type<?> type) {
+        this.type = type;
     }
 
     @Override
@@ -64,8 +66,8 @@ public class TableColumnIdentifier {
         builder.append(tableAlias);
         builder.append(", columnName=");
         builder.append(columnName);
-        builder.append(", javaType=");
-        builder.append(javaType);
+        builder.append(", type=");
+        builder.append(type);
         builder.append("]");
         return builder.toString();
     }

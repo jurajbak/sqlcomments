@@ -1,0 +1,4 @@
+--
+-- @SQLComment(name="insert", baseClass="sk.vracon.sqlcomments.maven.domain.Oracle.Datatypes")
+INSERT INTO datatypes ( BFILE_, BLOB_, B_DOUBLE, B_FLOAT, CHARACTER_, CHARACTER_VAR, CHAR_, CHAR_VAR, CLOB_, DATE_, DECIMAL_, DEC_, D_PRECISION, FLOAT_, INTEGER_, INTERVAL_DAY, INTERVAL_YEAR, INT_, LONG_, NATIONAL_CHAR, NATIONAL_CHARACTER, NATIONAL_CHARACTER_VARYING, NATIONAL_CHAR_VAR, NCHAR_, NCHAR_VARY, NCLOB_, NUMBER_, NUMERIC_, RAW_, REAL_, ROWID_, SMALL_INT, TIMESTAMP_, UROWID_, VARCHAR_, VAR_CHAR2)
+VALUES ( :bfile , :blob , :bDouble , :bFloat , :character , :characterVar , :char_ , :charVar , :clob , :date , :decimal , :dec , :dPrecision , :float_ , :integer , :intervalDay , :intervalYear , :int_ , :long_ , :nationalChar , :nationalCharacter , :nationalCharacterVarying , :nationalCharVar , :nchar , :ncharVary , :nclob , :number , :numeric , :raw , :real , :rowid , :smallInt , :timestamp , :urowid , :varchar , :varChar2 )

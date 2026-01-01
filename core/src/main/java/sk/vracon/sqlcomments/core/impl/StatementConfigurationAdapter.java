@@ -66,7 +66,7 @@ public abstract class StatementConfigurationAdapter implements StatementConfigur
      * 
      * @see sk.vracon.sqlcomments.core.StatementConfiguration#generateParameterMap()
      */
-    public Map<String, Object> generateParameterMap() {
+    public Map<String, Object> parameterMap() {
         return null;
     }
 
@@ -75,8 +75,13 @@ public abstract class StatementConfigurationAdapter implements StatementConfigur
      * 
      * @see sk.vracon.sqlcomments.core.StatementConfiguration#generateParametersAcceptingNull()
      */
-    public Set<String> generateParametersAcceptingNull() {
+    public Set<String> parametersAcceptingNull() {
         return null;
+    }
+    
+    @Override
+    public Set<String> primaryKey() {
+    	return null;
     }
 
     public Long limit() {

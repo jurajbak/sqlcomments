@@ -25,8 +25,8 @@ public class AbstractMojoTest {
 
     protected void compareFiles(String sourceDir, String targetDir, String file) throws IOException {
         // Must be created canonical files otherwise exists() will report false
-        File expectedFile = new File(sourceDir + file);
-        File generatedFile = new File(targetDir + file);
+		File expectedFile = new File(sourceDir + (sourceDir.endsWith("/") ? "" : "/") + file);
+		File generatedFile = new File(targetDir + (targetDir.endsWith("/") ? "" : "/") + file);
 
         Assert.assertTrue("Expected file does not exists: " + expectedFile.getAbsolutePath(), expectedFile.exists());
         Assert.assertTrue("Generated file does not exists: " + generatedFile.getAbsolutePath(), generatedFile.exists());
@@ -35,4 +35,5 @@ public class AbstractMojoTest {
 
         Assert.assertTrue("Content of files does not match: " + file, contentEquals);
     }
+
 }

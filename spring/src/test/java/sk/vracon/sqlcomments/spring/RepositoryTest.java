@@ -30,12 +30,13 @@ import org.springframework.stereotype.Repository;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import sk.vracon.sqlcomments.core.impl.ReflectionBeanMapper;
+import sk.vracon.sqlcomments.core.Type;
 import sk.vracon.sqlcomments.core.impl.StatementConfigurationAdapter;
+import sk.vracon.sqlcomments.core.resultmappers.ReflectionBeanMapper;
 import sk.vracon.sqlcomments.spring.sqlcomments.BlobConfig;
 import sk.vracon.sqlcomments.spring.sqlcomments.BlobTestMapper;
-import sk.vracon.sqlcomments.spring.sqlcomments.FindCompanyConfig;
-import sk.vracon.sqlcomments.spring.sqlcomments.FindCompanyMapper;
+import sk.vracon.sqlcomments.spring.sqlcomments.FindDepartmentConfig;
+import sk.vracon.sqlcomments.spring.sqlcomments.FindDepartmentMapper;
 import sk.vracon.sqlcomments.spring.sqlcomments.PlaceholderInsideInClauseConfig;
 import sk.vracon.sqlcomments.spring.sqlcomments.PlaceholderInsideInClauseMapper;
 import sk.vracon.sqlcomments.spring.sqlcomments.PlaceholderInsideLikeClauseConfig;
@@ -51,89 +52,89 @@ public class RepositoryTest extends GenericTestRepository {
     @Test
     public void testSelectList() throws Exception {
         /*-
-          @SQLComment(name="findCompany", resultClass="sk.vracon.sqlcomments.spring.FindCompany", configClass="sk.vracon.sqlcomments.spring.sqlcomments.FindCompanyConfig")
-          select comp.id, comp.name from companies comp
-          where comp.id = :companyId
+          @SQLComment(name="findDepartment", resultClass="sk.vracon.sqlcomments.spring.FindDepartment", configClass="sk.vracon.sqlcomments.spring.sqlcomments.FindDepartmentConfig")
+          select d.deptno, d.dname from dept d
+          where d.deptno = :departmentId
          */
 
-        FindCompanyConfig config = new FindCompanyConfig();
-        config.setCompanyId(5);
+        FindDepartmentConfig config = new FindDepartmentConfig();
+        config.setDepartmentId(20);
 
-        List<FindCompany> companies = list(config, new FindCompanyMapper());
+        List<FindDepartment> departments = list(config, new FindDepartmentMapper());
 
-        Assert.assertNotNull(companies);
-        Assert.assertEquals(1, companies.size());
+        Assert.assertNotNull(departments);
+        Assert.assertEquals(1, departments.size());
 
-        FindCompany companyInfo = companies.get(0);
+        FindDepartment department = departments.get(0);
 
-        Assert.assertNotNull(companyInfo);
-        Assert.assertNotNull(companyInfo.getId());
-        Assert.assertEquals(5, companyInfo.getId().intValue());
+        Assert.assertNotNull(department);
+        Assert.assertNotNull(department.getDeptno());
+        Assert.assertEquals(20, department.getDeptno().intValue());
     }
 
     @Test
     public void testSingleResult_NotNull() throws Exception {
-        // Reusing select findCompany
-        FindCompanyConfig config = new FindCompanyConfig();
-        config.setCompanyId(5);
+        // Reusing select FindDepartment
+        FindDepartmentConfig config = new FindDepartmentConfig();
+        config.setDepartmentId(10);
 
-        FindCompany companyInfo = singleResult(config, new FindCompanyMapper());
+        FindDepartment department = singleResult(config, new FindDepartmentMapper());
 
-        Assert.assertNotNull(companyInfo);
-        Assert.assertNotNull(companyInfo.getId());
-        Assert.assertEquals(5, companyInfo.getId().intValue());
+        Assert.assertNotNull(department);
+        Assert.assertNotNull(department.getDeptno());
+        Assert.assertEquals(10, department.getDeptno().intValue());
     }
 
     @Test
     public void testSingleResult_Null() throws Exception {
-        // Reusing select findCompany
-        FindCompanyConfig config = new FindCompanyConfig();
-        config.setCompanyId(-1);
+        // Reusing select FindDepartment
+        FindDepartmentConfig config = new FindDepartmentConfig();
+        config.setDepartmentId(-1);
 
-        FindCompany companyInfo = singleResult(config, new FindCompanyMapper());
+        FindDepartment department = singleResult(config, new FindDepartmentMapper());
 
-        Assert.assertNull(companyInfo);
+        Assert.assertNull(department);
     }
 
     @Test
     public void testPlaceholderInsideInClause() throws Exception {
         /*-
           @SQLComment(name="placeholderInsideInClause", resultClass="sk.vracon.sqlcomments.spring.PlaceholderInsideInClause", configClass="sk.vracon.sqlcomments.spring.sqlcomments.PlaceholderInsideInClauseConfig")
-          select comp.id, comp.name from companies comp
-          where comp.id IN (:companyId)
-          order by comp.id
+          select d.deptno, d.dname from dept d
+          where d.deptno IN (:departmentNumbers)
+          order by d.dname
          */
 
         Set<Integer> ids = new HashSet<Integer>();
-        ids.add(5);
-        ids.add(6);
-        ids.add(7);
+        ids.add(20);
+        ids.add(10);
+        ids.add(30);
 
         PlaceholderInsideInClauseConfig config = new PlaceholderInsideInClauseConfig();
-        config.setCompanyId(ids);
+        config.setDepartmentNumbers(ids);
 
-        List<PlaceholderInsideInClause> companies = list(config, new PlaceholderInsideInClauseMapper());
+        List<PlaceholderInsideInClause> departments = list(config, new PlaceholderInsideInClauseMapper());
 
-        Assert.assertNotNull(companies);
-        Assert.assertEquals(3, companies.size());
+        Assert.assertNotNull(departments);
+        Assert.assertEquals(3, departments.size());
 
-        PlaceholderInsideInClause companyInfo1 = companies.get(0);
+        PlaceholderInsideInClause department1 = departments.get(0);
 
-        Assert.assertNotNull(companyInfo1);
-        Assert.assertNotNull(companyInfo1.getId());
-        Assert.assertEquals(5, companyInfo1.getId().intValue());
+        Assert.assertNotNull(department1);
+        Assert.assertNotNull(department1.getDeptno());
+        Assert.assertEquals(10, department1.getDeptno().intValue());
 
-        PlaceholderInsideInClause companyInfo2 = companies.get(1);
+        PlaceholderInsideInClause department2 = departments.get(1);
 
-        Assert.assertNotNull(companyInfo2);
-        Assert.assertNotNull(companyInfo2.getId());
-        Assert.assertEquals(6, companyInfo2.getId().intValue());
+        Assert.assertNotNull(department2);
+        Assert.assertNotNull(department2.getDeptno());
+        Assert.assertEquals(20, department2.getDeptno().intValue());
 
-        PlaceholderInsideInClause companyInfo3 = companies.get(2);
+        PlaceholderInsideInClause department3 = departments.get(2);
 
-        Assert.assertNotNull(companyInfo3);
-        Assert.assertNotNull(companyInfo3.getId());
-        Assert.assertEquals(7, companyInfo3.getId().intValue());
+        Assert.assertNotNull(department3);
+        Assert.assertNotNull(department3.getDeptno());
+        Assert.assertEquals(30, department3.getDeptno().intValue());
 
     }
 
@@ -141,100 +142,98 @@ public class RepositoryTest extends GenericTestRepository {
     public void testPlaceholderInsideLikeClause() throws Exception {
         /*-
           @SQLComment(name="placeholderInsideLikeClause", resultClass="sk.vracon.sqlcomments.spring.PlaceholderInsideLikeClause", configClass="sk.vracon.sqlcomments.spring.sqlcomments.PlaceholderInsideLikeClauseConfig")
-          select comp.id, comp.name from companies comp
-          where comp.name LIKE :companyName
+          select d.deptno, d.dname from dept d
+          where d.dname LIKE :departmentName
          */
 
         PlaceholderInsideLikeClauseConfig config = new PlaceholderInsideLikeClauseConfig();
-        config.setCompanyName("D%");
+        config.setDepartmentName("R%");
 
         List<PlaceholderInsideLikeClause> companies = list(config, new PlaceholderInsideLikeClauseMapper());
 
         Assert.assertNotNull(companies);
-        Assert.assertEquals(2, companies.size());
+        Assert.assertEquals(1, companies.size());
 
-        PlaceholderInsideLikeClause companyInfo1 = companies.get(0);
+        PlaceholderInsideLikeClause department1 = companies.get(0);
 
-        Assert.assertNotNull(companyInfo1);
-        Assert.assertNotNull(companyInfo1.getId());
-        Assert.assertNotNull(companyInfo1.getName());
-        Assert.assertTrue(companyInfo1.getName().startsWith("D"));
-
-        PlaceholderInsideLikeClause companyInfo2 = companies.get(1);
-
-        Assert.assertNotNull(companyInfo2);
-        Assert.assertNotNull(companyInfo2.getId());
-        Assert.assertNotNull(companyInfo2.getName());
-        Assert.assertTrue(companyInfo2.getName().startsWith("D"));
+        Assert.assertNotNull(department1);
+        Assert.assertNotNull(department1.getDeptno());
+        Assert.assertNotNull(department1.getDname());
+        Assert.assertTrue(department1.getDname().startsWith("R"));
     }
 
     @Test
     public void testReplacement() throws Exception {
         /*-
           @SQLComment(name="replacementTest", resultClass="sk.vracon.sqlcomments.spring.ReplacementTest", configClass="sk.vracon.sqlcomments.spring.sqlcomments.ReplacementTestConfig")
-          select comp.id, comp.name from companies comp
-          where comp.id IN (:companyId)
+          select d.deptno, d.dname from dept d
+          where d.deptNo IN (:departmentNumbers)
           order by ${orderBy} -- //@ orderBy != null
          */
 
         Set<Integer> ids = new HashSet<Integer>();
-        ids.add(5);
-        ids.add(6);
-        ids.add(7);
+        ids.add(10);
+        ids.add(30);
+        ids.add(20);
 
         ReplacementTestConfig config = new ReplacementTestConfig();
-        config.setCompanyId(ids);
-        config.setOrderBy("comp.id desc");
+        config.setDepartmentNumbers(ids);
+        config.setOrderBy("d.deptno desc");
 
         List<ReplacementTest> companies = list(config, new ReplacementTestMapper());
 
         Assert.assertNotNull(companies);
         Assert.assertEquals(3, companies.size());
 
-        ReplacementTest companyInfo1 = companies.get(0);
+        ReplacementTest department1 = companies.get(0);
 
-        Assert.assertNotNull(companyInfo1);
-        Assert.assertNotNull(companyInfo1.getId());
-        Assert.assertEquals(7, companyInfo1.getId().intValue());
+        Assert.assertNotNull(department1);
+        Assert.assertNotNull(department1.getDeptno());
+        Assert.assertEquals(30, department1.getDeptno().intValue());
 
-        ReplacementTest companyInfo2 = companies.get(1);
+        ReplacementTest department2 = companies.get(1);
 
-        Assert.assertNotNull(companyInfo2);
-        Assert.assertNotNull(companyInfo2.getId());
-        Assert.assertEquals(6, companyInfo2.getId().intValue());
+        Assert.assertNotNull(department2);
+        Assert.assertNotNull(department2.getDeptno());
+        Assert.assertEquals(20, department2.getDeptno().intValue());
 
-        ReplacementTest companyInfo3 = companies.get(2);
+        ReplacementTest department3 = companies.get(2);
 
-        Assert.assertNotNull(companyInfo3);
-        Assert.assertNotNull(companyInfo3.getId());
-        Assert.assertEquals(5, companyInfo3.getId().intValue());
+        Assert.assertNotNull(department3);
+        Assert.assertNotNull(department3.getDeptno());
+        Assert.assertEquals(10, department3.getDeptno().intValue());
 
     }
 
     @Test
     public void testReplacementInvalidSQL() throws Exception {
 
-        List<FindCompany> companies = list(new StatementConfigurationAdapter("replacementInvalidSQL", RepositoryTest.class) {
-            public Map<String, Object> generateParameterMap() {
+    	List<FindDepartment> departments = list(new StatementConfigurationAdapter("replacementInvalidSQL", RepositoryTest.class) {
+            public Map<String, Object> parameterMap() {
                 Map<String, Object> params = new HashMap<String, Object>();
 
-                params.put("orderBy", "id");
+                params.put("orderBy", "deptno");
                 params.put("orderDirection", "desc");
 
                 return params;
             }
-        }, ReflectionBeanMapper.createInstance(FindCompany.class));
 
-        Assert.assertNotNull(companies);
-        Assert.assertEquals(10, companies.size());
+			@Override
+			public Map<String, Type<?>> typeMap() {
+				return null;
+			}
+        }, ReflectionBeanMapper.createInstance(FindDepartment.class));
 
-        int indx = 10;
-        for (FindCompany company : companies) {
-            Assert.assertNotNull(company);
-            Assert.assertNotNull(company.getId());
-            Assert.assertEquals(indx, company.getId().intValue());
+        Assert.assertNotNull(departments);
+        Assert.assertEquals(4, departments.size());
 
-            indx--;
+        int indx = 40;
+        for (FindDepartment department : departments) {
+            Assert.assertNotNull(department);
+            Assert.assertNotNull(department.getDeptno());
+            Assert.assertEquals(indx, department.getDeptno().intValue());
+
+            indx -= 10;
         }
     }
 
@@ -242,8 +241,8 @@ public class RepositoryTest extends GenericTestRepository {
     public void testBlob() throws Exception {
         /*-
           @SQLComment(name="blobTest", resultClass="sk.vracon.sqlcomments.spring.BlobTest", configClass="sk.vracon.sqlcomments.spring.sqlcomments.BlobConfig")
-          select * from documents
-          where id = 1
+          select * from datatypes
+          where integer_ = 123456
          */
         BlobConfig config = new BlobConfig();
 
@@ -253,7 +252,7 @@ public class RepositoryTest extends GenericTestRepository {
         Assert.assertEquals(1, documents.size());
 
         BlobTest doc = documents.get(0);
-        Blob data = doc.getData();
+        Blob data = doc.getBlob();
 
         Assert.assertNotNull(data);
 

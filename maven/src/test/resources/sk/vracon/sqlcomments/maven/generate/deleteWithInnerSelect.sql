@@ -3,4 +3,4 @@
 -- Testing basic functionality.
 --
 -- @SQLComment(name="deleteWithInnerSelect", configClass="sk.vracon.sqlcomments.maven.generate.sqlcomments.DeleteWithInnerSelectConfig")
-DELETE FROM Companies WHERE id NOT IN (SELECT companyId FROM users)
+DELETE FROM dept WHERE deptno NOT IN (SELECT deptno FROM emp)

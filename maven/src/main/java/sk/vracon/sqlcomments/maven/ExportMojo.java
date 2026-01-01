@@ -45,10 +45,47 @@ import sk.vracon.sqlcomments.maven.java.Java8Lexer;
 @Mojo(name = "export", defaultPhase = LifecyclePhase.GENERATE_SOURCES, requiresProject = true)
 public class ExportMojo extends AbstractMojo {
 
-    private static final String LINE_SEPARATOR = System.getProperty("line.separator");
-    
     private static final String[] DEFAULT_INCLUDES = {"**/*.java"};
 
+    /**
+     * Accepted values for {@link ExportMojo#lineSeparator} property.
+     */
+    public static enum LineSeparatorValues {
+      	/**
+    	 * System default.
+    	 */
+    	SYSTEM(System.getProperty("line.separator")),
+    	/**
+    	 * Unix-like (LF) line ending.
+    	 */
+    	UNIX("\n"),
+    	/**
+    	 * Windows-like (CRLF) line ending.
+    	 */
+    	WINDOWS("\r\n");
+    	
+    	private String separator;
+    	
+    	private LineSeparatorValues(String separator) {
+    		this.separator = separator;
+    	}
+    }
+    
+    /**
+     * Line separator character used in generated files.
+     * <p>
+     * Accepted values are:
+     * <ul>
+     * <li>SYSTEM</li>
+     * <li>UNIX</li>
+     * <li>WINDOWS</li>
+     * </ul>
+     * 
+     * The default value is SYSTEM.
+     */
+    @Parameter(required = false, defaultValue = "SYSTEM")
+    protected LineSeparatorValues lineSeparator;
+    
     /**
      * The directory which contains the sources you want to be parsed.
      * 
@@ -225,7 +262,7 @@ public class ExportMojo extends AbstractMojo {
                 } else {
                     // Part of SQL statement
                     statementText.append(line);
-                    statementText.append(LINE_SEPARATOR);
+                    statementText.append(lineSeparator.separator);
                 }
             }
         }
@@ -268,7 +305,7 @@ public class ExportMojo extends AbstractMojo {
             fw.write(declaration.getBaseClassName());
             fw.write(":");
             fw.write(Integer.toString(declaration.getDeclarationLineNumber()));
-            fw.write(LINE_SEPARATOR);
+            fw.write(lineSeparator.separator);
 
             // Write declaration
             fw.write("-- ");
@@ -279,7 +316,7 @@ public class ExportMojo extends AbstractMojo {
             addComma = writeParameter(fw, Constants.PARAM_RESULTCLASS, declaration.getResultClassName(), declaration.isDefaultResultClass(), addComma);
             addComma = writeParameter(fw, Constants.PARAM_CONFIGCLASS, declaration.getConfigurationClassName(), declaration.isDefaultConfigurationClass(), addComma);
             writeParameter(fw, Constants.PARAM_DATABASE, declaration.getDatabase(), false, addComma);
-            fw.write(")" + LINE_SEPARATOR);
+            fw.write(")" + lineSeparator.separator);
 
             // Write SQL statement
             fw.write(declaration.getStatementText());

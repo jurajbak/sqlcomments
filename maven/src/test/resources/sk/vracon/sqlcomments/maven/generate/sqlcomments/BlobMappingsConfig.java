@@ -5,37 +5,49 @@ import java.util.Map;
 import java.util.Set;
 
 import sk.vracon.sqlcomments.core.StatementConfiguration;
+import sk.vracon.sqlcomments.core.Type;
 
+/**
+ * SQLComments configuration class for statement blobMappings.
+ */
 public class BlobMappingsConfig implements StatementConfiguration {
 
-	private static final Class<?> BASE_CLASS = null;
+    private static final Map<String, Type<?>> __parameterTypes = Map.ofEntries();
 
-	private Map<String, Object> __sqlParameters;
-	
-	private Set<String> __acceptNullParameters;
-	
-	private Long limit;
+    private Map<String, Object> __sqlParameters;
+    private Set<String> __acceptNullParameters;
+    private Long limit;
     private Long offset;
 
+    /**
+     * Creates new instance of SQLComments configuration class for statement blobMappings.
+     */
+    public BlobMappingsConfig() {
+    }
 
-	public BlobMappingsConfig() {
-	}
+    public String statementName() {
+        return "blobMappings";
+    }
+    
+    public Class<?> baseClass() {
+        return null;
+    }
+    
+    public Map<String, Type<?>> typeMap() {
+        return __parameterTypes;
+    }
 
-	public String statementName() {
-		return "blobMappings";
-	}
-	
-	public Class<?> baseClass() {
-		return BASE_CLASS;
-	}
-
-	public Map<String, Object> generateParameterMap() {
-		return __sqlParameters;
-	}
-	
-	public Set<String> generateParametersAcceptingNull() {
-		return __acceptNullParameters;
-	}
+    public Map<String, Object> parameterMap() {
+        return __sqlParameters;
+    }
+    
+    public Set<String> parametersAcceptingNull() {
+        return __acceptNullParameters;
+    }
+    
+    public Set<String> primaryKey() {
+        return null;
+    }
 
     public Long limit() {
         return limit;
@@ -51,5 +63,29 @@ public class BlobMappingsConfig implements StatementConfiguration {
 
     public void offset(Long offset) {
         this.offset = offset;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("BlobMappingsConfig [statementName=");
+        builder.append(statementName());
+        builder.append(", baseClass=");
+        builder.append(baseClass());
+        builder.append(", sqlParameters=");
+        builder.append(parameterMap());
+        builder.append(", acceptNullParameters=");
+        builder.append(parametersAcceptingNull());
+        builder.append(", limit=");
+        builder.append(limit());
+        builder.append(", offset=");
+        builder.append(offset());
+        builder.append("]");
+        return builder.toString();
     }
 }

@@ -17,10 +17,18 @@ package sk.vracon.sqlcomments.maven.generate;
 
 import java.util.Stack;
 
+/**
+ * Base class for various statement contexts during parsing SQL statements.
+ */
 public abstract class AbstractStatementContext {
 
     private Stack<TableInfo> tables = new Stack<TableInfo>();
 
+    /**
+     * Returns a stack of tables in use.
+     * 
+     * @return stack of tables in use
+     */
     public Stack<TableInfo> getTables() {
         return tables;
     }

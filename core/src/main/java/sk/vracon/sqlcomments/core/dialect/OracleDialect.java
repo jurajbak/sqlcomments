@@ -1,11 +1,51 @@
 package sk.vracon.sqlcomments.core.dialect;
 
+import sk.vracon.sqlcomments.core.types.BlobType;
+import sk.vracon.sqlcomments.core.types.DoubleType;
+import sk.vracon.sqlcomments.core.types.DurationType;
+import sk.vracon.sqlcomments.core.types.FloatType;
+import sk.vracon.sqlcomments.core.types.PeriodType;
+
 /**
  * Oracle database dialect.
  * 
  */
-public class OracleDialect implements DatabaseDialect {
+public class OracleDialect extends AbstractDatabaseDialect {
 
+	static {
+		TYPE_MAPPINGS.add(new BlobType(new int[] {
+				/**
+				 * BFILE
+				 */
+				-13
+		}, 110));
+		TYPE_MAPPINGS.add(new FloatType(new int[] {
+				/**
+				 * BINARY_FLOAT
+				 */
+				100
+		}, 110));
+		TYPE_MAPPINGS.add(new DoubleType(new int[] {
+				/**
+				 * BINARY_DOUBLE
+				 */
+				101
+		}, 110));
+		TYPE_MAPPINGS.add(new DurationType(new int[] {
+				/**
+				 * INTERVAL DAY(2) TO SECOND(6)
+				 */
+				-104
+		}, 110));
+		TYPE_MAPPINGS.add(new PeriodType(new int[] {
+				/**
+				 * INTERVAL DAY(2) TO SECOND(6)
+				 */
+				-103
+		}, 110));
+	}
+	
+	
     /**
      * Returns common database name 'oracle'.
      */

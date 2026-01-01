@@ -31,24 +31,20 @@ import sk.vracon.sqlcomments.core.dialect.DatabaseDialect;
  * <p>
  * Statement container is not mandatory, but it has some useful features like loading, caching and takes care of
  * compiling control scripts.
- * </p>
  * <p>
  * Statement files are loaded from classpath in order:
  * <ol>
- * <li>Database specific statement file (if {@link #databaseProductName} is <code>null</code> this step is skipped).</li>
+ * <li>Database specific statement file.</li>
  * <li>Generic statement file (without database product name).</li>
  * </ol>
  * If no statement file is found, {@link IllegalArgumentException} is thrown.
- * </p>
  * <p>
  * The default script engine for control scripts is used JavaScript. All scripts are compiled before first usage. It is
  * possible to use custom script engine by using {@link #StatementContainer(String)} constructor. In this case used
  * engine must implement Compilable interface.
- * </p>
  * <p>
  * For performance reasons caching is enabled by default. To disable it call {@link #setEnableCache(boolean)}. Disabling
  * cache is useful for development.
- * </p>
  * 
  * @see StatementParser
  * @see #setEnableCache(boolean)
@@ -86,7 +82,8 @@ public class StatementContainer {
         }
 
         // Get script engine
-        scriptEngine = (Compilable) new ScriptEngineManager().getEngineByName(scriptEngineName);
+        ScriptEngineManager scriptEngineManager = new ScriptEngineManager();
+		scriptEngine = (Compilable) scriptEngineManager.getEngineByName(scriptEngineName);
         if (scriptEngine == null) {
             throw new IllegalStateException("No script engine '" + scriptEngineName + "' found.");
         }
@@ -165,7 +162,7 @@ public class StatementContainer {
         }
 
         if (input == null) {
-            throw new StatementNotFoundException("Statement file found: " + fullName);
+            throw new StatementNotFoundException("Statement file not found: " + fullName);
         }
 
         // Read input into string

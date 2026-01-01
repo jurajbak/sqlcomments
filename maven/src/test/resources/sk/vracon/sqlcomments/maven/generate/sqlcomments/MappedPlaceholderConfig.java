@@ -1,6 +1,6 @@
 package sk.vracon.sqlcomments.maven.generate.sqlcomments;
 
-import sk.vracon.sqlcomments.maven.ExampleEnum;
+import sk.vracon.sqlcomments.core.types.StringType;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,55 +8,87 @@ import java.util.Map;
 import java.util.Set;
 
 import sk.vracon.sqlcomments.core.StatementConfiguration;
+import sk.vracon.sqlcomments.core.Type;
 
+/**
+ * SQLComments configuration class for statement mappedPlaceholder.
+ */
 public class MappedPlaceholderConfig implements StatementConfiguration {
 
-	private static final Class<?> BASE_CLASS = null;
+    private static final Map<String, Type<?>> __parameterTypes = Map.ofEntries(
+                Map.entry("location", StringType.getInstance()));
 
-	private Map<String, Object> __sqlParameters;
-	
-	private Set<String> __acceptNullParameters;
-	
-	private Long limit;
+    private Map<String, Object> __sqlParameters;
+    private Set<String> __acceptNullParameters;
+    private Long limit;
     private Long offset;
 
-	private sk.vracon.sqlcomments.core.mappers.EnumMapper countryColumnMapper = new sk.vracon.sqlcomments.core.mappers.EnumMapper(); 
+    /**
+     * Creates new instance of SQLComments configuration class for statement mappedPlaceholder.
+     */
+    public MappedPlaceholderConfig() {
+    }
 
-	public MappedPlaceholderConfig() {
-		countryColumnMapper.setJavaType(ExampleEnum.class); 
-	}
+    /**
+     * Setter for placeholder location.
+     * <p>
+     * Placeholder is mapped to DEPT.LOC.
+     */
+    public void setLocation(String value) {
+        if(__sqlParameters == null) {
+            __sqlParameters = new HashMap<String, Object>();
+        }
+        
+        __sqlParameters.put("location", value);
+    }
 
-	public void setCountry(ExampleEnum value) {
-		if(__sqlParameters == null) {
-			__sqlParameters = new HashMap<String, Object>();
-		}
-		
-		__sqlParameters.put("country", countryColumnMapper.convertToDatabase(value));
-	}
-	
-	public void acceptNullInCountry() {
-		if(__acceptNullParameters == null) {
-			__acceptNullParameters = new HashSet<String>();
-		}
-		
-		__acceptNullParameters.add("country");
-	}
-	
-	public String statementName() {
-		return "mappedPlaceholder";
-	}
-	
-	public Class<?> baseClass() {
-		return BASE_CLASS;
-	}
+    /**
+     * Setter for placeholder location.
+     * <p>
+     * Placeholder is mapped to DEPT.LOC.
+     */
+    public MappedPlaceholderConfig withLocation(String value) {
+        setLocation(value);
+        
+        return this;
+    }
+    
+    /**
+     * Accept <code>null</code> value for location placeholder and do not remove rows from statement where this placeholder is used.
+     */
+    public MappedPlaceholderConfig acceptNullInLocation() {
+        if(__acceptNullParameters == null) {
+            __acceptNullParameters = new HashSet<String>();
+        }
+        
+        __acceptNullParameters.add("location");
+        
+        return this;
+    }
+    
+    public String statementName() {
+        return "mappedPlaceholder";
+    }
+    
+    public Class<?> baseClass() {
+        return null;
+    }
+    
+    public Map<String, Type<?>> typeMap() {
+        return __parameterTypes;
+    }
 
-	public Map<String, Object> generateParameterMap() {
-		return __sqlParameters;
-	}
-	
-	public Set<String> generateParametersAcceptingNull() {
-		return __acceptNullParameters;
-	}
+    public Map<String, Object> parameterMap() {
+        return __sqlParameters;
+    }
+    
+    public Set<String> parametersAcceptingNull() {
+        return __acceptNullParameters;
+    }
+    
+    public Set<String> primaryKey() {
+        return null;
+    }
 
     public Long limit() {
         return limit;
@@ -72,5 +104,29 @@ public class MappedPlaceholderConfig implements StatementConfiguration {
 
     public void offset(Long offset) {
         this.offset = offset;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("MappedPlaceholderConfig [statementName=");
+        builder.append(statementName());
+        builder.append(", baseClass=");
+        builder.append(baseClass());
+        builder.append(", sqlParameters=");
+        builder.append(parameterMap());
+        builder.append(", acceptNullParameters=");
+        builder.append(parametersAcceptingNull());
+        builder.append(", limit=");
+        builder.append(limit());
+        builder.append(", offset=");
+        builder.append(offset());
+        builder.append("]");
+        return builder.toString();
     }
 }

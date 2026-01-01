@@ -3,5 +3,5 @@
 -- Placeholder should have an java.util.Collection type
 --
 -- @SQLComment(name="selectWithPlaceholder", resultClass="sk.vracon.sqlcomments.maven.generate.PlaceholderInsideInClause", configClass="sk.vracon.sqlcomments.maven.generate.sqlcomments.PlaceholderInsideInClauseConfig")
-select comp.id, comp.name from companies comp
-where comp.id IN (:companyId)
+select d.deptno, d.dname from dept d
+where d.deptno IN (:departmentIds)

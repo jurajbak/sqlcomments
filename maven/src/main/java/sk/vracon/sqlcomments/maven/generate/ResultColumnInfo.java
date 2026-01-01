@@ -18,109 +18,77 @@ package sk.vracon.sqlcomments.maven.generate;
 import java.util.HashSet;
 import java.util.Set;
 
+import sk.vracon.sqlcomments.core.Type;
+
 public class ResultColumnInfo {
 
-    private String columnName;
-    private String javaIdentifier;
-    private Class<?> javaClass;
-    private String mappedClass;
-    private String mapperClass;
-    private boolean asterix;
-    private Set<TableColumnIdentifier> references = new HashSet<TableColumnIdentifier>();
-    private Set<AbstractStatementContext> subqueries = new HashSet<AbstractStatementContext>();
+	private String columnName;
+	private String javaIdentifier;
+	private Type<?> type;
+	private boolean asterix;
+	private Set<TableColumnIdentifier> references = new HashSet<TableColumnIdentifier>();
+	private Set<AbstractStatementContext> subqueries = new HashSet<AbstractStatementContext>();
 
-    public ResultColumnInfo() {
-        // TODO Auto-generated constructor stub
-    }
-    
-    public String getColumnName() {
-        return columnName;
-    }
+	public ResultColumnInfo() {
+		// TODO Auto-generated constructor stub
+	}
 
-    public void setColumnName(String alias) {
-        this.columnName = alias;
-    }
+	public String getColumnName() {
+		return columnName;
+	}
 
-    public String getJavaIdentifier() {
-        return javaIdentifier;
-    }
+	public void setColumnName(String alias) {
+		this.columnName = alias;
+	}
 
-    public void setJavaIdentifier(String javaIdentifier) {
-        this.javaIdentifier = javaIdentifier;
-    }
+	public String getJavaIdentifier() {
+		return javaIdentifier;
+	}
 
-    public Set<AbstractStatementContext> getSubqueries() {
-        return subqueries;
-    }
+	public void setJavaIdentifier(String javaIdentifier) {
+		this.javaIdentifier = javaIdentifier;
+	}
 
-    public boolean isAsterix() {
-        return asterix;
-    }
+	public Set<AbstractStatementContext> getSubqueries() {
+		return subqueries;
+	}
 
-    public void setAsterix(boolean asterix) {
-        this.asterix = asterix;
-    }
+	public boolean isAsterix() {
+		return asterix;
+	}
 
-    public Set<TableColumnIdentifier> getReferences() {
-        return references;
-    }
+	public void setAsterix(boolean asterix) {
+		this.asterix = asterix;
+	}
 
-    public Class<?> getJavaClass() {
-        return javaClass;
-    }
+	public Set<TableColumnIdentifier> getReferences() {
+		return references;
+	}
 
-    public void setJavaClass(Class<?> javaClass) {
-        this.javaClass = javaClass;
-    }
+	public Type<?> getType() {
+		return type;
+	}
 
-    /**
-     * @return the mappedClass
-     */
-    public String getMappedClass() {
-        return mappedClass;
-    }
+	public void setType(Type<?> type) {
+		this.type = type;
+	}
 
-    /**
-     * @param mappedClass the mappedClass to set
-     */
-    public void setMappedClass(String mappedClass) {
-        this.mappedClass = mappedClass;
-    }
-
-    /**
-     * @return the mapperClass
-     */
-    public String getMapperClass() {
-        return mapperClass;
-    }
-
-    /**
-     * @param mapperClass the mapperClass to set
-     */
-    public void setMapperClass(String mapperClass) {
-        this.mapperClass = mapperClass;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("ColumnInfo [columnName=");
-        builder.append(columnName);
-        builder.append(", javaIdentifier=");
-        builder.append(javaIdentifier);
-        builder.append(", javaClass=");
-        builder.append(javaClass);
-        builder.append(", mappedClass=");
-        builder.append(mappedClass);
-        builder.append(", mapperClass=");
-        builder.append(mapperClass);
-        builder.append(", asterix=");
-        builder.append(asterix);
-        builder.append(", references=");
-        builder.append(references);
-        builder.append(", subqueries=");
-        builder.append(subqueries);
-        builder.append("]");
-        return builder.toString();
-    }
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("ResultColumnInfo [columnName=");
+		builder.append(columnName);
+		builder.append(", javaIdentifier=");
+		builder.append(javaIdentifier);
+		builder.append(", type=");
+		builder.append(type);
+		builder.append(", asterix=");
+		builder.append(asterix);
+		builder.append(", references=");
+		builder.append(references);
+		builder.append(", subqueries=");
+		builder.append(subqueries);
+		builder.append("]");
+		return builder.toString();
+	}
 }

@@ -3,7 +3,7 @@
 <@compress single_line=true>
 INSERT INTO ${table} (
 <#list columns as column>
-	${column.columnName}<#if column_has_next>,</#if>
+	${column.columnName}<#sep>,
 </#list>
 )
 </@compress>
@@ -16,7 +16,7 @@ INSERT INTO ${table} (
 	<#else>
 	:${placeholders[column_index].name}
 	</#if>
-	<#if column_has_next>,</#if>
+	<#sep>,
 </#list>
 )
 </@compress>

@@ -1,54 +1,47 @@
 package sk.vracon.sqlcomments.maven.generate.sqlcomments;
 
+import sk.vracon.sqlcomments.core.types.IntegerType;
+import java.util.Date;
+import sk.vracon.sqlcomments.core.types.DateType;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import sk.vracon.sqlcomments.core.ResultMapper;
+import sk.vracon.sqlcomments.core.Type;
 import sk.vracon.sqlcomments.maven.generate.DefaultResult;
 
+/**
+ * SQLComments result mapper class for statement defaultResult.
+ * <p>
+ * Implementation is thread-safe, use {@link #INSTANCE}.
+ */
 public class DefaultResultMapper implements ResultMapper<DefaultResult> {
 
-	public static final DefaultResultMapper INSTANCE = new DefaultResultMapper();
+    /**
+     * Static instance of DefaultResultMapper class.
+     */
+    public static final DefaultResultMapper INSTANCE = new DefaultResultMapper();
 
+    private Type<Integer> empnoType = (Type<Integer>) IntegerType.getInstance(); 
+    private Type<Date> enddateType = (Type<Date>) DateType.getInstance(); 
+    private Type<Integer> projidType = (Type<Integer>) IntegerType.getInstance(); 
+    private Type<Date> startdateType = (Type<Date>) DateType.getInstance(); 
 
-	public DefaultResultMapper() {
-	}
-
-	public DefaultResult transform(ResultSet resultSet) throws SQLException {
-		DefaultResult result = new DefaultResult();
-		
-		Integer companyidValue = (Integer) resultSet.getInt("COMPANYID");
-		if(resultSet.wasNull()) {
-			companyidValue = null;
-		}
-		result.setCompanyid(companyidValue);
-		String countryValue = (String) resultSet.getString("COUNTRY");
-		if(resultSet.wasNull()) {
-			countryValue = null;
-		}
-		result.setCountry(countryValue);
-		String emailValue = (String) resultSet.getString("EMAIL");
-		if(resultSet.wasNull()) {
-			emailValue = null;
-		}
-		result.setEmail(emailValue);
-		String firstNameValue = (String) resultSet.getString("FIRST_NAME");
-		if(resultSet.wasNull()) {
-			firstNameValue = null;
-		}
-		result.setFirstName(firstNameValue);
-		Integer idValue = (Integer) resultSet.getInt("ID");
-		if(resultSet.wasNull()) {
-			idValue = null;
-		}
-		result.setId(idValue);
-		String lastNameValue = (String) resultSet.getString("LAST_NAME");
-		if(resultSet.wasNull()) {
-			lastNameValue = null;
-		}
-		result.setLastName(lastNameValue);
-		
-		return result;
-	}
+    /**
+     * Reads one database statement result row and transforms it to instance of {@link DefaultResult}.
+     *
+     * @param resultSet select statement {@link ResultSet} pointing to row to be red
+     * @return new instance of {@link DefaultResult} filled by data from database result
+     */
+    public DefaultResult transform(ResultSet resultSet) throws SQLException {
+        DefaultResult result = new DefaultResult();
+        
+        result.setEmpno(empnoType.readValue(resultSet, "EMPNO"));
+        result.setEnddate(enddateType.readValue(resultSet, "ENDDATE"));
+        result.setProjid(projidType.readValue(resultSet, "PROJID"));
+        result.setStartdate(startdateType.readValue(resultSet, "STARTDATE"));
+        
+        return result;
+    }
 }

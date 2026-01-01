@@ -4,7 +4,7 @@ package sk.vracon.sqlcomments.core.dialect;
  * HSQL database dialect.
  * 
  */
-public class HSQLDialect implements DatabaseDialect {
+public class HSQLDialect extends AbstractDatabaseDialect {
 
     /**
      * Returns common database name 'hsql'.

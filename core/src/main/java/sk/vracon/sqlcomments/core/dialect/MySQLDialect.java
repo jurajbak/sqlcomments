@@ -1,11 +1,22 @@
 package sk.vracon.sqlcomments.core.dialect;
 
+import sk.vracon.sqlcomments.core.types.FloatType;
+
 /**
  * MySQL database dialect.
  * 
  */
-public class MySQLDialect implements DatabaseDialect {
+public class MySQLDialect extends AbstractDatabaseDialect {
 
+	static {
+		TYPE_MAPPINGS.add(new FloatType(new int[] {
+				/**
+				 * FLOAT
+				 */
+				7
+		}, 110));
+	}
+	
     /**
      * Returns common database name 'mysql'.
      */

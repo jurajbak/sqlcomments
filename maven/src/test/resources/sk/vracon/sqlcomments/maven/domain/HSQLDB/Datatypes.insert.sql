@@ -1,0 +1,4 @@
+--
+-- @SQLComment(name="insert", baseClass="sk.vracon.sqlcomments.maven.domain.HSQLDB.Datatypes")
+INSERT INTO DATATYPES ( ARRAY_, BIGINT_, BINARY_, BLOB_, BOOLEAN_, CHAR_, CLOB_, DATE_, DECIMAL_, DOUBLE_, FLOAT_, INTEGER_, INTERVAL_DS_, INTERVAL_YM_, NUMERIC_, REAL_, SMALLINT_, TIMESTAMP_, TIMESTAMP_TZ_, TIME_, TINYINT_, UUID_, VARBINARY_, VARCHAR_, VARCHAR_IGNORECASE_)
+VALUES ( :array , :bigint , :binary , :blob , :boolean_ , :char_ , :clob , :date , :decimal , :double_ , :float_ , :integer , :intervalDs , :intervalYm , :numeric , :real , :smallint , :timestamp , :timestampTz , :time , :tinyint , :uuid , :varbinary , :varchar , :varcharIgnorecase )

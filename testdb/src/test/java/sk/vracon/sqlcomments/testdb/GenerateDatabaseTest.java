@@ -22,6 +22,7 @@ import java.sql.DriverManager;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
+import org.springframework.util.FileSystemUtils;
 
 public class GenerateDatabaseTest {
 
@@ -33,7 +34,7 @@ public class GenerateDatabaseTest {
     @Test
     public void generateDatabase() throws Exception {
         // Delete old database if exists
-        deleteDirectory(new File("target/clasess/testdb.tmp"));
+    	FileSystemUtils.deleteRecursively(new File("target/clasess/testdb.tmp"));
         new File("target/classes/testdb.lobs").delete();
         new File("target/classes/testdb.log").delete();
         new File("target/classes/testdb.properties").delete();
@@ -50,26 +51,9 @@ public class GenerateDatabaseTest {
         System.out.println(connection.getMetaData().getDatabaseProductName());
 
         // Create database
-        ScriptUtils.executeSqlScript(connection, new ClassPathResource("schema.sql"));
-        ScriptUtils.executeSqlScript(connection, new ClassPathResource("data.sql"));
+        ScriptUtils.executeSqlScript(connection, new ClassPathResource("/employees-test-database/scripts/Employees - HSQLDB.sql"));
 
         // Close connection
         connection.close();
-    }
-
-    public static boolean deleteDirectory(File directory) {
-        if (directory.exists()) {
-            File[] files = directory.listFiles();
-            if (null != files) {
-                for (int i = 0; i < files.length; i++) {
-                    if (files[i].isDirectory()) {
-                        deleteDirectory(files[i]);
-                    } else {
-                        files[i].delete();
-                    }
-                }
-            }
-        }
-        return (directory.delete());
     }
 }

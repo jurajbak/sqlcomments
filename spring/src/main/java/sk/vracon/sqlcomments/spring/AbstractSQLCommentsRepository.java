@@ -32,6 +32,7 @@ import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 
+import sk.vracon.sqlcomments.core.CRUDType;
 import sk.vracon.sqlcomments.core.ResultMapper;
 import sk.vracon.sqlcomments.core.Statement;
 import sk.vracon.sqlcomments.core.StatementConfiguration;
@@ -40,6 +41,7 @@ import sk.vracon.sqlcomments.core.StatementException;
 import sk.vracon.sqlcomments.core.StatementGenerator;
 import sk.vracon.sqlcomments.core.Utils;
 import sk.vracon.sqlcomments.core.dialect.DatabaseDialect;
+import sk.vracon.sqlcomments.core.impl.StatementConfigurationWrapper;
 
 /**
  * Abstract spring repository with implemented CRUD operations.
@@ -56,7 +58,6 @@ import sk.vracon.sqlcomments.core.dialect.DatabaseDialect;
  * <li>delete statement file - &lt;T&gt;.delete.sql</li>
  * <li>findByPK statement file - &lt;T&gt;.findByPK.sql</li>
  * </ul>
- * </p>
  */
 public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
 
@@ -76,7 +77,7 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
      *            statement configuration (usually class generated as a &lt;T&gt;PKConfig)
      * @param mapper
      *            class mapper
-     * @return
+     * @return domain class instance filled by data or null if no result
      */
     protected <T> T findByPK(StatementConfiguration config, ResultMapper<T> mapper) {
 
@@ -103,7 +104,7 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
      * @return the same instance with primary key filled
      */
     protected <T> T insert(T domain) {
-        executeCRUDOperation("insert", true, domain);
+        executeCRUDOperation(CRUDType.INSERT, true, domain);
         return domain;
     }
 
@@ -120,7 +121,7 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
      *            domain class to be stored in DB
      */
     protected <T> void update(T domain) {
-        executeCRUDOperation("update", false, domain);
+        executeCRUDOperation(CRUDType.UPDATE, false, domain);
     }
 
     /**
@@ -136,7 +137,7 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
      *            domain to be removed from DB
      */
     protected <T> void delete(T domain) {
-        executeCRUDOperation("delete", false, domain);
+        executeCRUDOperation(CRUDType.DELETE, false, domain);
     }
 
     /**
@@ -153,10 +154,18 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
 
         getJdbcTemplate().execute(new PreparedStatementCreator() {
             public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-                Set<String> acceptNullParameters = configuration.generateParameterMap().keySet();
-
-                return AbstractSQLCommentsRepository.this.createPreparedStatement(con, configuration.baseClass(), "delete",
-                        configuration.generateParameterMap(), acceptNullParameters, configuration.offset(), configuration.limit(), null);
+            	
+            	StatementConfiguration config = configuration;
+            	if ("findByPK".equals(configuration.statementName())) {
+            		config = new StatementConfigurationWrapper(configuration) {
+            			@Override
+            			public String statementName() {
+            				return "delete";
+            			}
+            		};
+            	}
+            	
+                return AbstractSQLCommentsRepository.this.createPreparedStatement(con, config, false);
             }
         }, new PreparedStatementCallback<Object>() {
             public Object doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException {
@@ -166,27 +175,13 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
         });
     }
 
-    private <T> void executeCRUDOperation(String crudType, final boolean replaceKeys, final T domain) {
+    private <T> void executeCRUDOperation(CRUDType crudType, final boolean replaceKeys, final T domain) {
 
         final StatementConfiguration configuration = createConfiguration(crudType, domain);
 
         getJdbcTemplate().execute(new PreparedStatementCreator() {
             public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-                Set<String> acceptNullParameters = configuration.generateParameterMap().keySet();
-
-                String[] keys = null;
-                if (replaceKeys) {
-                    try {
-                        keys = (String[]) configuration.getClass().getField("PRIMARY_KEY").get(null);
-                    }
-                    catch (Exception e) {
-                        throw new IllegalStateException("Unable to get value of static field " + configuration.getClass().getName() + ".PRIMARY_KEY. Cause: "
-                                + e.getMessage(), e);
-                    }
-                }
-
-                return AbstractSQLCommentsRepository.this.createPreparedStatement(con, configuration.baseClass(), configuration.statementName(),
-                        configuration.generateParameterMap(), acceptNullParameters, configuration.offset(), configuration.limit(), keys);
+                return AbstractSQLCommentsRepository.this.createPreparedStatement(con, configuration, replaceKeys);
             }
         }, new PreparedStatementCallback<Object>() {
             public Object doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException {
@@ -224,13 +219,13 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
         }
     }
 
-    private <T> StatementConfiguration createConfiguration(String operation, T domain) {
+    private <T> StatementConfiguration createConfiguration(CRUDType operation, T domain) {
         Class<? extends Object> domainClass = domain.getClass();
         String configClassName = domainClass.getPackage().getName() + ".sqlcomments." + domainClass.getSimpleName() + "Config";
         try {
             Class<?> configClass = Class.forName(configClassName, true, domainClass.getClassLoader());
 
-            Constructor<?> constructor = configClass.getConstructor(String.class, domainClass);
+            Constructor<?> constructor = configClass.getConstructor(CRUDType.class, domainClass);
 
             StatementConfiguration configuration = (StatementConfiguration) constructor.newInstance(operation, domain);
 
@@ -315,24 +310,41 @@ public class AbstractSQLCommentsRepository extends JdbcDaoSupport {
      *             thrown if statement creation failed
      */
     protected PreparedStatement createPreparedStatement(Connection connection, StatementConfiguration configuration) {
+        return createPreparedStatement(connection, configuration, false);
+    }
+
+    /**
+     * Creates prepared statement.
+     * <p>
+     * As a base class is used <i>this</i>.
+     * </p>
+     * 
+     * @param connection
+     *            JDBC connection. Caller is responsible to return connection to pool if necessary.
+     * @param configuration
+     *            statement configuration
+     * @param useGeneratedKeys
+     *            flag to indicate whether to set up {@link PreparedStatement} to return generated columns 
+     * @return prepared statement
+     * @throws StatementException
+     *             thrown if statement creation failed
+     */
+    public PreparedStatement createPreparedStatement(Connection connection, StatementConfiguration configuration, boolean useGeneratedKeys) {
+        if (connection == null) {
+            throw new IllegalArgumentException("Connection must be set.");
+        }
+
         if (configuration == null) {
             throw new IllegalArgumentException("Configuration must be set.");
         }
 
-        return createPreparedStatement(connection, configuration.baseClass(), configuration.statementName(), configuration.generateParameterMap(),
-                configuration.generateParametersAcceptingNull(), configuration.offset(), configuration.limit(), null);
-    }
-
-    private PreparedStatement createPreparedStatement(Connection connection, Class<?> baseClass, String statementName, Map<String, Object> parameters,
-            Set<String> acceptNullParameters, Long offset, Long limit, String[] keys) {
-
-        if (statementName == null) {
+        if (configuration.statementName() == null) {
             throw new IllegalArgumentException("Statement name must be set.");
         }
 
-        Statement statement = statementContainer.getStatement(baseClass, statementName);
+        Statement statement = statementContainer.getStatement(configuration.baseClass(), configuration.statementName());
 
-        return statementGenerator.createPreparedStatement(connection, statement, parameters, acceptNullParameters, offset, limit, keys);
+        return statementGenerator.createPreparedStatement(connection, statement, configuration, useGeneratedKeys);
     }
 
     /**

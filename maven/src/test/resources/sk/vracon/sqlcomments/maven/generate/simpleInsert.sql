@@ -3,5 +3,5 @@
 -- Testing basic functionality.
 --
 -- @SQLComment(name="simpleInsert", configClass="sk.vracon.sqlcomments.maven.generate.sqlcomments.SimpleInsertConfig")
-INSERT INTO Companies (id, name, email) 
-VALUES (:id, :name, :email)
+INSERT INTO proj (PROJID,EMPNO,STARTDATE,ENDDATE) 
+VALUES (:projectId, :employeeNo, :startDate, :endDate)

@@ -15,6 +15,8 @@
  */
 package sk.vracon.sqlcomments.spring;
 
+import java.util.Date;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,10 +24,10 @@ import org.springframework.stereotype.Repository;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import sk.vracon.sqlcomments.core.impl.ReflectionBeanMapper;
-import sk.vracon.sqlcomments.spring.domain.Users;
-import sk.vracon.sqlcomments.spring.domain.sqlcomments.UsersMapper;
-import sk.vracon.sqlcomments.spring.domain.sqlcomments.UsersPKConfig;
+import sk.vracon.sqlcomments.core.resultmappers.ReflectionBeanMapper;
+import sk.vracon.sqlcomments.spring.domain.Employee;
+import sk.vracon.sqlcomments.spring.domain.sqlcomments.EmployeeMapper;
+import sk.vracon.sqlcomments.spring.domain.sqlcomments.EmployeePKConfig;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {RepositoryConfiguration.class})
@@ -34,82 +36,86 @@ public class CRUDTest extends GenericTestRepository {
 
     @Test
     public void testFindByPK() {
-        UsersPKConfig config = new UsersPKConfig();
-        config.setId(5);
+        EmployeePKConfig config = new EmployeePKConfig();
+        config.setEmpno(7900);
 
-        Users user = findByPK(config, new UsersMapper());
+        Employee user = findByPK(config, new EmployeeMapper());
 
         Assert.assertNotNull(user);
-        Assert.assertNotNull(user.getId());
-        Assert.assertEquals(new Integer(5), user.getId());
+        Assert.assertNotNull(user.getEmpno());
+        Assert.assertEquals(Integer.valueOf(7900), user.getEmpno());
     }
 
     @Test
     public void testInsertUser() {
-        Users user = new Users();
+    	Employee user = new Employee();
 
-        user.setFirstName("NewUser1");
-        user.setLastName("NewUserLast1");
+        user.setEname("NewUser1");
+        user.setEmpno(1);
+        user.setDeptno(10);
+        user.setHiredate(new Date());
+        user.setJob("Test");
+        user.setSal(1000);
 
-        Users saved = insert(user);
+        Employee saved = insert(user);
 
         Assert.assertEquals(user, saved);
-        Assert.assertNotNull(saved.getId());
+        Assert.assertNotNull(saved.getEmpno());
 
-        UsersPKConfig config = new UsersPKConfig();
-        config.setId(saved.getId());
+        EmployeePKConfig config = new EmployeePKConfig();
+        config.setEmpno(saved.getEmpno());
 
-        Users found = findByPK(config, new UsersMapper());
+        Employee found = findByPK(config, new EmployeeMapper());
 
         Assert.assertNotNull(found);
-        Assert.assertEquals(saved.getId(), found.getId());
+        Assert.assertEquals(saved.getEmpno(), found.getEmpno());
     }
 
     @Test
     public void testUpdateUser() {
-        UsersPKConfig config = new UsersPKConfig();
-        config.setId(5);
+    	EmployeePKConfig config = new EmployeePKConfig();
+        config.setEmpno(7900);
 
-        Users user = findByPK(config, new UsersMapper());
+        Employee user = findByPK(config, new EmployeeMapper());
 
         Assert.assertNotNull(user);
 
-        user.setFirstName("ChangedFirstName");
-        user.setLastName("ChangedLastName");
+        user.setEname("ChangedName");
+        user.setJob("ChangedJob");
 
         update(user);
 
-        Users updated = singleResult(config, new ReflectionBeanMapper<Users>(Users.class));
+        Employee updated = singleResult(config, new ReflectionBeanMapper<Employee>(Employee.class));
 
         Assert.assertNotNull(user);
-        Assert.assertEquals("ChangedFirstName", updated.getFirstName());
-        Assert.assertEquals("ChangedLastName", updated.getLastName());
+        Assert.assertEquals("ChangedName", updated.getEname());
+        Assert.assertEquals("ChangedJob", updated.getJob());
     }
 
     @Test
     public void testDeleteWithInstance() {
-        UsersPKConfig config = new UsersPKConfig();
-        config.setId(5);
+        EmployeePKConfig config = new EmployeePKConfig();
+        config.setEmpno(7902);
 
-        Users user = findByPK(config, new UsersMapper());
+        Employee user = findByPK(config, new EmployeeMapper());
 
         Assert.assertNotNull(user);
 
         delete(user);
 
-        Users deleted = findByPK(config, new UsersMapper());
+        Employee deleted = findByPK(config, new EmployeeMapper());
 
         Assert.assertNull(deleted);
     }
 
     @Test
     public void testDeleteWithConfig() {
-        UsersPKConfig config = new UsersPKConfig();
-        config.setId(6);
+        EmployeePKConfig config = new EmployeePKConfig();
+        config.setEmpno(6);
 
         delete(config);
 
-        Users deleted = findByPK(config, new UsersMapper());
+        Employee deleted = findByPK(config, new EmployeeMapper());
 
         Assert.assertNull(deleted);
     }

@@ -2,6 +2,7 @@ package sk.vracon.sqlcomments.spring;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -10,22 +11,26 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import sk.vracon.sqlcomments.core.DBColumnMetadata;
+import sk.vracon.sqlcomments.core.Type;
 import sk.vracon.sqlcomments.core.dialect.DatabaseDialect;
 import sk.vracon.sqlcomments.core.dialect.HSQLDialect;
+import sk.vracon.sqlcomments.core.dialect.MariaDBDialect;
 import sk.vracon.sqlcomments.core.dialect.MySQLDialect;
+import sk.vracon.sqlcomments.core.dialect.OracleDialect;
 import sk.vracon.sqlcomments.core.dialect.PostgreSQLDialect;
 
 /**
  * {@link DatabaseDialect} wrapper bean.
  * <p>
- * Bean is trying to select correct database dialect according to used database.
- * </p>
+ * Class is trying to select correct database dialect according to used database.
  */
 public class CurrentDatabaseDialectWrapper implements DatabaseDialect, InitializingBean {
 
     private DatabaseDialect dialect;
-    private DataSource dataSource;
+	private DataSource dataSource;
 
+	@Override
     public void afterPropertiesSet() throws Exception {
 
         // Get database name
@@ -40,32 +45,41 @@ public class CurrentDatabaseDialectWrapper implements DatabaseDialect, Initializ
             dialect = new HSQLDialect();
         } else if (database.equalsIgnoreCase("MySQL")) {
             dialect = new MySQLDialect();
+        } else if (database.equalsIgnoreCase("MariaDB")) {
+            dialect = new MariaDBDialect();
         } else if (database.equalsIgnoreCase("PostgreSQL")) {
             dialect = new PostgreSQLDialect();
+        } else if (database.equalsIgnoreCase("Oracle")) {
+            dialect = new OracleDialect();
         } else {
             throw new IllegalStateException("No dialect for database type: " + database);
         }
     }
 
-    /**
-     * @return
-     * @see sk.vracon.sqlcomments.core.dialect.DatabaseDialect#getDatabaseProductName()
-     */
+	@Override
     public String getDatabaseProductName() {
         return dialect.getDatabaseProductName();
     }
 
-    /**
-     * @param sql
-     * @param offset
-     * @param limit
-     * @return
-     * @see sk.vracon.sqlcomments.core.dialect.DatabaseDialect#generateSQLWithOffsetAndLimit(java.lang.String,
-     *      java.lang.Long, java.lang.Long)
-     */
+	@Override
     public String generateSQLWithOffsetAndLimit(String sql, Long offset, Long limit) {
         return dialect.generateSQLWithOffsetAndLimit(sql, offset, limit);
     }
+
+	@Override
+    public Type<?> getMostGenericType(Set<Type<?>> classes) {
+		return dialect.getMostGenericType(classes);
+	}
+
+	@Override
+	public Type<?> getType(DBColumnMetadata columnMetadata) {
+		return dialect.getType(columnMetadata);
+	}
+
+	@Override
+	public void addCustomTypeMapping(DBColumnMetadata column, Type<?> type) {
+		dialect.addCustomTypeMapping(column, type);
+	}
 
     /**
      * Sets data source.

@@ -1,15 +1,21 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>sqlcomments</artifactId>
 		<groupId>sk.vracon.sqlcomments</groupId>
-		<version>0.0.3</version>
+		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>sk.vracon.sqlcomments</groupId>
 	<artifactId>sqlcomments-spring</artifactId>
 	<name>SQL Comments Spring Support</name>
+
+	<properties>
+		<sqlcomments.domain.package>sk.vracon.sqlcomments.spring.domain</sqlcomments.domain.package>
+	</properties>
 
 	<build>
 		<plugins>
@@ -31,7 +37,8 @@
 							<goal>export</goal>
 						</goals>
 						<configuration>
-							<sourceDirectory>${project.build.testSourceDirectory}</sourceDirectory>
+							<sourceDirectory>
+								${project.build.testSourceDirectory}</sourceDirectory>
 							<compileWithTestClasses>true</compileWithTestClasses>
 						</configuration>
 					</execution>
@@ -43,11 +50,15 @@
 							<goal>domain</goal>
 						</goals>
 						<configuration>
-							<packageName>sk.vracon.sqlcomments.spring.domain</packageName>
+							<packageName>${sqlcomments.domain.package}</packageName>
 							<tables>
-								<USERS />
-								<COMPANIES />
-								<DOCUMENTS />
+								<EMP>
+									className=${sqlcomments.domain.package}.Employee</EMP>
+								<DEPT>
+									className=${sqlcomments.domain.package}.Department</DEPT>
+								<PROJ>
+									className=${sqlcomments.domain.package}.Project</PROJ>
+								<DATATYPES />
 							</tables>
 							<jdbcDriverClass>org.hsqldb.jdbcDriver</jdbcDriverClass>
 							<databaseUrl>jdbc:hsqldb:res:testdb</databaseUrl>
@@ -62,6 +73,16 @@
 						<artifactId>sqlcomments-testdb</artifactId>
 						<groupId>sk.vracon.sqlcomments</groupId>
 						<version>${project.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.graalvm.js</groupId>
+						<artifactId>js</artifactId>
+						<version>${dependency.version.graalvm}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.graalvm.js</groupId>
+						<artifactId>js-scriptengine</artifactId>
+						<version>${dependency.version.graalvm}</version>
 					</dependency>
 				</dependencies>
 			</plugin>
@@ -112,6 +133,16 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.graalvm.js</groupId>
+			<artifactId>js</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.graalvm.js</groupId>
+			<artifactId>js-scriptengine</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

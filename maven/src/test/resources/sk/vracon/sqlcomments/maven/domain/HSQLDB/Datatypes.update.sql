@@ -1,0 +1,29 @@
+--
+-- @SQLComment(name="update", baseClass="sk.vracon.sqlcomments.maven.domain.HSQLDB.Datatypes")
+UPDATE DATATYPES SET
+	ARRAY_ = :array,
+	BIGINT_ = :bigint,
+	BINARY_ = :binary,
+	BLOB_ = :blob,
+	BOOLEAN_ = :boolean_,
+	CHAR_ = :char_,
+	CLOB_ = :clob,
+	DATE_ = :date,
+	DECIMAL_ = :decimal,
+	DOUBLE_ = :double_,
+	FLOAT_ = :float_,
+	INTERVAL_DS_ = :intervalDs,
+	INTERVAL_YM_ = :intervalYm,
+	NUMERIC_ = :numeric,
+	REAL_ = :real,
+	SMALLINT_ = :smallint,
+	TIMESTAMP_ = :timestamp,
+	TIMESTAMP_TZ_ = :timestampTz,
+	TIME_ = :time,
+	TINYINT_ = :tinyint,
+	UUID_ = :uuid,
+	VARBINARY_ = :varbinary,
+	VARCHAR_ = :varchar,
+	VARCHAR_IGNORECASE_ = :varcharIgnorecase
+WHERE
+	INTEGER_ = :integer 

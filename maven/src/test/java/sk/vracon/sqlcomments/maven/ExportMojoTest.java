@@ -43,6 +43,7 @@ public class ExportMojoTest extends AbstractMojoTest {
         mojo.includes = new String[] {SimpleAllOk.class.getPackage().getName().replace('.', '/') + "/*.java"};
         mojo.project = new MavenProject();
         mojo.compileWithTestClasses = true;
+        mojo.lineSeparator = ExportMojo.LineSeparatorValues.UNIX;
 
         mojo.execute();
     }

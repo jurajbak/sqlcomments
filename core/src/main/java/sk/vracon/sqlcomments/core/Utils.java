@@ -15,6 +15,8 @@
  */
 package sk.vracon.sqlcomments.core;
 
+import javax.lang.model.SourceVersion;
+
 /**
  * Utility methods.
  * 
@@ -79,6 +81,12 @@ public class Utils {
             }
             pos++;
         }
-        return buf.toString();
+        String identifier = buf.toString();
+        
+        if (SourceVersion.isKeyword(identifier) || !SourceVersion.isIdentifier(identifier)) {
+        	identifier += "_";
+        }
+        
+		return identifier;
     }
 }

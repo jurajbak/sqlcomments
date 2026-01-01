@@ -15,102 +15,100 @@
  */
 package sk.vracon.sqlcomments.maven.generate;
 
+import java.util.Set;
+
+import sk.vracon.sqlcomments.core.DBColumnMetadata;
+import sk.vracon.sqlcomments.core.Type;
 import sk.vracon.sqlcomments.maven.sql.SQLParser.Variable_placeholderContext;
 
 public class PlaceholderInfo {
 
-    private String name;
-    private Class<?> javaClass;
-    private boolean collection;
-    private String mappedClass;
-    private String mapperClass;
-    private Variable_placeholderContext sqlContext;
-    private AbstractStatementContext context;
+	private String name;
+	private boolean collection;
+	private Type<?> type;
+	private Variable_placeholderContext sqlContext;
+	private AbstractStatementContext context;
+	private Set<TableColumnIdentifier> tableColumnIdentifiers;
+	private Set<DBColumnMetadata> dbColumns;
 
-    public String getName() {
-        return name;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public Class<?> getJavaClass() {
-        return javaClass;
-    }
+	public Class<?> getJavaClass() {
+		return getType().getJavaClass();
+	}
 
-    public void setJavaClass(Class<?> javaClass) {
-        this.javaClass = javaClass;
-    }
+	public boolean isCollection() {
+		return collection;
+	}
 
-    public boolean isCollection() {
-        return collection;
-    }
+	public void setCollection(boolean collection) {
+		this.collection = collection;
+	}
 
-    public void setCollection(boolean collection) {
-        this.collection = collection;
-    }
+	public Variable_placeholderContext getSqlContext() {
+		return sqlContext;
+	}
 
-    /**
-     * @return the mappedClass
-     */
-    public String getMappedClass() {
-        return mappedClass;
-    }
+	public void setSqlContext(Variable_placeholderContext sqlContext) {
+		this.sqlContext = sqlContext;
+	}
 
-    /**
-     * @param mappedClass the mappedClass to set
-     */
-    public void setMappedClass(String mappedClass) {
-        this.mappedClass = mappedClass;
-    }
+	public AbstractStatementContext getContext() {
+		return context;
+	}
 
-    /**
-     * @return the mapperClass
-     */
-    public String getMapperClass() {
-        return mapperClass;
-    }
+	public void setSelectContext(AbstractStatementContext selectContext) {
+		this.context = selectContext;
+	}
 
-    /**
-     * @param mapperClass the mapperClass to set
-     */
-    public void setMapperClass(String mapperClass) {
-        this.mapperClass = mapperClass;
-    }
+	public Set<TableColumnIdentifier> getTableColumnIdentifiers() {
+		return tableColumnIdentifiers;
+	}
 
-    public Variable_placeholderContext getSqlContext() {
-        return sqlContext;
-    }
+	public void setTableColumnIdentifiers(Set<TableColumnIdentifier> tableColumnIdentifiers) {
+		this.tableColumnIdentifiers = tableColumnIdentifiers;
+	}
 
-    public void setSqlContext(Variable_placeholderContext sqlContext) {
-        this.sqlContext = sqlContext;
-    }
+	public Set<DBColumnMetadata> getDbColumns() {
+		return dbColumns;
+	}
 
-    public AbstractStatementContext getContext() {
-        return context;
-    }
+	public void setDbColumns(Set<DBColumnMetadata> dbColumns) {
+		this.dbColumns = dbColumns;
+	}
 
-    public void setSelectContext(AbstractStatementContext selectContext) {
-        this.context = selectContext;
-    }
+	public Type<?> getType() {
+		return type;
+	}
 
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("PlaceholderInfo [name=");
-        builder.append(name);
-        builder.append(", javaClass=");
-        builder.append(javaClass);
-        builder.append(", collection=");
-        builder.append(collection);
-        builder.append(", mappedClass=");
-        builder.append(mappedClass);
-        builder.append(", mapperClass=");
-        builder.append(mapperClass);
-        builder.append(", sqlContext=");
-        builder.append(sqlContext);
-        builder.append("]");
-        return builder.toString();
-    }
+	public void setType(Type<?> type) {
+		this.type = type;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("PlaceholderInfo [name=");
+		builder.append(name);
+		builder.append(", collection=");
+		builder.append(collection);
+		builder.append(", type=");
+		builder.append(type);
+		builder.append(", sqlContext=");
+		builder.append(sqlContext);
+		builder.append(", context=");
+		builder.append(context);
+		builder.append(", tableColumnIdentifiers=");
+		builder.append(tableColumnIdentifiers);
+		builder.append(", dbColumns=");
+		builder.append(dbColumns);
+		builder.append("]");
+		return builder.toString();
+	}
 }
