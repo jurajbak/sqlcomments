@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>sk.vracon.sqlcomments</groupId>
 	<artifactId>sqlcomments</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<packaging>pom</packaging>
 
 	<name>SQL Comments Parent POM</name>
@@ -29,6 +29,7 @@
 
 	<scm>
 		<connection>scm:git:https://github.com/jurajbak/sqlcomments.git</connection>
+		<developerConnection>scm:git:ssh://github.com/jurajbak/sqlcomments.git</developerConnection>
 		<url>https://github.com/jurajbak/sqlcomments</url>
 	</scm>
 
@@ -46,8 +47,20 @@
 		</developer>
 	</developers>
 
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<java.version>17</java.version>
 
 		<dependency.version.antlr>4.13.2</dependency.version.antlr>
 		<dependency.version.freemarker>2.3.34</dependency.version.freemarker>
@@ -69,37 +82,6 @@
 		<module>spring</module>
 		<module>testdb</module>
 	</modules>
-
-	<build>
-		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>external.atlassian.jgitflow</groupId>
-				<artifactId>jgitflow-maven-plugin</artifactId>
-				<version>1.0-m3</version>
-				<configuration>
-					<autoVersionSubmodules>true</autoVersionSubmodules>
-					<enableFeatureVersions>true</enableFeatureVersions>
-					<keepBranch>false</keepBranch>
-					<pushFeatures>false</pushFeatures>
-					<pushHotfixes>false</pushHotfixes>
-					<pushReleases>false</pushReleases>
-
-					<noDeploy>true</noDeploy>
-					<noFeatureBuild>true</noFeatureBuild>
-					<pullMaster>true</pullMaster>
-					<pullDevelop>true</pullDevelop>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
 
 	<profiles>
 		<profile>
@@ -151,6 +133,15 @@
 								</goals>
 							</execution>
 						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.sonatype.central</groupId>
+						<artifactId>central-publishing-maven-plugin</artifactId>
+						<version>0.9.0</version>
+						<extensions>true</extensions>
+						<configuration>
+							<publishingServerId>ossrh</publishingServerId>
+						</configuration>
 					</plugin>
 				</plugins>
 			</build>
